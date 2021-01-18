@@ -11,4 +11,5 @@ type Channel struct {
 type ChannelMembers struct {
 	Name   string `json:"name,omitempty" bson:"name,omitempty"`
 	UserID string `json:"userID,omitempty" bson:"userID,omitempty"`
+	Email  string `json:"email,omitempty" bson:"email,omitempty"`
 }
