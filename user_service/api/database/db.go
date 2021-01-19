@@ -9,6 +9,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// DB postgres db client
+var DB *pg.DB
+
 // Connect creates a connection to postgres
 func Connect() error {
 
@@ -19,7 +22,7 @@ func Connect() error {
 		return err
 	}
 
-	db := pg.Connect(&pg.Options{
+	DB = pg.Connect(&pg.Options{
 		Addr:     os.Getenv("DB_ADDR"),
 		User:     os.Getenv("DB_USER"),
 		Password: os.Getenv("DB_PASSWORD"),
@@ -27,7 +30,7 @@ func Connect() error {
 	})
 
 	// Check if database is up and running
-	if err := db.Ping(context.Background()); err != nil {
+	if err := DB.Ping(context.Background()); err != nil {
 		return err
 	}
 	log.Println("Connected to db")
