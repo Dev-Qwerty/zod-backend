@@ -1,5 +1,12 @@
 package models
 
+import (
+	"context"
+
+	"github.com/Dev-Qwerty/zod-backend/project_service/api/database"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
 // Project model
 type Project struct {
 	// ProjectID   string     `json:"projectID,omitempty" bson:"projectID,omitempty"`
@@ -23,4 +30,15 @@ type PendingInvite struct {
 	UserID string `json:"userID,omitempty" bson:"userID,omitempty"`
 	Email  string `json:"email,omitempty" bson:"email,omitempty"`
 	Role   string `json:"userRole,omitempty" bson:"userRole,omitempty"`
+}
+
+// CreateProject creates a new project and save it to db
+func (p *Project) CreateProject() (string, error) {
+	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
+	createdProjectID, err := zodeProjectCollection.InsertOne(context.TODO(), p)
+	if err != nil {
+		return "", err
+	}
+	id := createdProjectID.InsertedID.(primitive.ObjectID).Hex()
+	return id, nil
 }
