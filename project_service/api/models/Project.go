@@ -14,6 +14,7 @@ type Project struct {
 	Channels       *[]Channel       `json:"channels,omitempty" bson:"channels,omitempty"`
 	Members        *[]Member        `json:"projectMembers,omitempty" bson:"projectMembers,omitempty"`
 	PendingInvites *[]PendingInvite `json:"pendingInvites,omitempty" bson:"pendingInvites,omitempty"`
+	CreatedBy      string           `json:"createdBy,omitempty" bson:"createdBy,omitempty"`
 }
 
 // Member model
@@ -26,10 +27,8 @@ type Member struct {
 
 // PendingInvite models
 type PendingInvite struct {
-	Name   string `json:"name,omitempty" bson:"name,omitempty"`
-	UserID string `json:"userID,omitempty" bson:"userID,omitempty"`
-	Email  string `json:"email,omitempty" bson:"email,omitempty"`
-	Role   string `json:"userRole,omitempty" bson:"userRole,omitempty"`
+	Email string `json:"email,omitempty" bson:"email,omitempty"`
+	Role  string `json:"userRole,omitempty" bson:"userRole,omitempty"`
 }
 
 // CreateProject creates a new project and save it to db
