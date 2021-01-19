@@ -2,7 +2,7 @@ package models
 
 // Channel model
 type Channel struct {
-	ChannelID   string            `json:"channelID,omitempty" bson:"channelID,omitempty"`
+	// ChannelID   string            `json:"channelID,omitempty" bson:"channelID,omitempty"`
 	ChannelName string            `json:"channelName,omitempty" bson:"channelName,omitempty"`
 	Members     *[]ChannelMembers `json:"channelMembers,omitempty" bson:"channelMembers,omitempty"`
 }
