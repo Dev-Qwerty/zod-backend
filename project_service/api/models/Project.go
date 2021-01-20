@@ -9,12 +9,13 @@ import (
 
 // Project model
 type Project struct {
-	// ProjectID   string     `json:"projectID,omitempty" bson:"projectID,omitempty"`
+	ProjectID      string           `json:"projectID,omitempty" bson:"_id,omitempty"`
 	ProjectName    string           `json:"projectName,omitempty" bson:"projectName,omitempty"`
 	Channels       *[]Channel       `json:"channels,omitempty" bson:"channels,omitempty"`
 	Members        *[]Member        `json:"projectMembers,omitempty" bson:"projectMembers,omitempty"`
 	PendingInvites *[]PendingInvite `json:"pendingInvites,omitempty" bson:"pendingInvites,omitempty"`
-	CreatedBy      string           `json:"createdBy,omitempty" bson:"createdBy,omitempty"`
+	Teamlead       string           `json:"teamlead,omitempty" bson:"teamlead,omitempty"`
+	Deadline       string           `json:"deadline,omitempty" bson:"deadline,omitempty"`
 }
 
 // Member model
