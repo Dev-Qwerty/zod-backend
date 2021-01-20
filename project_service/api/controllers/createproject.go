@@ -28,6 +28,7 @@ func CreateProjectHandler(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
+	project.Teamlead = userDetails.DisplayName
 
 	// creating member model of the user created the project with an owner role
 	member := &models.Member{}
