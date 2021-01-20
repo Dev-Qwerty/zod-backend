@@ -6,12 +6,15 @@ import (
 
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/config"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/database"
+	"github.com/Dev-Qwerty/zod-backend/project_service/api/routes"
 	"github.com/gorilla/mux"
 )
 
 // Run creates and starts server
 func Run() {
 	router := mux.NewRouter()
+
+	routes.InitializeRoutes(router)
 
 	defer func() {
 		if r := recover(); r != nil {

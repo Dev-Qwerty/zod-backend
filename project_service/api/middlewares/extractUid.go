@@ -21,8 +21,7 @@ func ExtractUID(next http.Handler) http.Handler {
 			fmt.Println(err)
 		}
 		ctx := r.Context()
-		ctx = context.WithValue(ctx, "tokenuid", token.UID)
-		fmt.Println(token)
+		ctx = context.WithValue(ctx, "tokenuid", token)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
