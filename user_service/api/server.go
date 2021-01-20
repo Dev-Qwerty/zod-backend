@@ -6,6 +6,7 @@ import (
 
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/config"
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/database"
+	"github.com/Dev-Qwerty/zod-backend/user_service/api/routes"
 	"github.com/gorilla/mux"
 )
 
@@ -15,6 +16,7 @@ func Run() {
 	var err error
 
 	router := mux.NewRouter()
+	routes.InitializeRoutes(router)
 
 	// Adds firebase to the server
 	err = config.InitializeFirebase()
