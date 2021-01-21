@@ -64,3 +64,24 @@ func GetProjectsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	responses.JSON(w, http.StatusOK, projects)
 }
+
+// AddProjectMembersHandler creates handler for /addnewprojectmembers route
+func AddProjectMembersHandler(w http.ResponseWriter, r *http.Request) {
+	project := &models.Project{}
+	ctx := r.Context()
+	token := ctx.Value("tokenuid")
+	tokenStruct := token.(*auth.Token)
+
+	err := json.NewDecoder(r.Body).Decode(&project)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	err = project.AddProjectMembers(tokenStruct.Claims["email"].(string))
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, err)
+		return
+	}
+	responses.JSON(w, http.StatusOK, nil)
+}
