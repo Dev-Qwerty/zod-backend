@@ -50,3 +50,17 @@ func CreateProjectHandler(w http.ResponseWriter, r *http.Request) {
 
 	responses.JSON(w, http.StatusOK, projectID)
 }
+
+// GetProjectsHandler is the handler for /getprojects route
+func GetProjectsHandler(w http.ResponseWriter, r *http.Request) {
+	project := &models.Project{}
+	ctx := r.Context()
+	token := ctx.Value("tokenuid")
+	tokenStruct := token.(*auth.Token)
+
+	projects, err := project.GetProjects(tokenStruct.Claims["email"].(string))
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+	}
+	responses.JSON(w, http.StatusOK, projects)
+}

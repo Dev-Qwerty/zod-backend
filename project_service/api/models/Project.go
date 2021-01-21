@@ -4,7 +4,9 @@ import (
 	"context"
 
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/database"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Project model
@@ -41,4 +43,41 @@ func (p *Project) CreateProject() (string, error) {
 	}
 	id := createdProjectID.InsertedID.(primitive.ObjectID).Hex()
 	return id, nil
+}
+
+// GetProjects fetch projects of a user from mongodb
+func (p *Project) GetProjects(userEmail string) ([]*Project, error) {
+	var projects []*Project
+	projection := bson.M{
+		"projectName": 1,
+		"teamlead":    1,
+		"deadline":    1,
+	}
+	filter := bson.M{
+		"projectMembers": bson.M{
+			"$elemMatch": bson.M{
+				"email": userEmail}}}
+	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
+	cursor, err := zodeProjectCollection.Find(context.TODO(), filter, options.Find().SetProjection(projection))
+
+	if err != nil {
+		return []*Project{}, err
+	}
+	for cursor.Next(context.TODO()) {
+		var project Project
+		err := cursor.Decode(&project)
+		if err != nil {
+			return []*Project{}, err
+		}
+		projects = append(projects, &project)
+	}
+
+	cursor.Close(context.TODO())
+
+	if err := cursor.Err(); err != nil {
+		return []*Project{}, err
+	}
+
+	return projects, nil
+
 }
