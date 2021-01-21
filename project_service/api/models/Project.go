@@ -11,13 +11,13 @@ import (
 
 // Project model
 type Project struct {
-	ProjectID      string           `json:"projectID,omitempty" bson:"_id,omitempty"`
-	ProjectName    string           `json:"projectName,omitempty" bson:"projectName,omitempty"`
-	Channels       *[]Channel       `json:"channels,omitempty" bson:"channels,omitempty"`
-	Members        *[]Member        `json:"projectMembers,omitempty" bson:"projectMembers,omitempty"`
-	PendingInvites *[]PendingInvite `json:"pendingInvites,omitempty" bson:"pendingInvites,omitempty"`
-	Teamlead       string           `json:"teamlead,omitempty" bson:"teamlead,omitempty"`
-	Deadline       string           `json:"deadline,omitempty" bson:"deadline,omitempty"`
+	ProjectID      primitive.ObjectID `json:"projectID,omitempty" bson:"_id,omitempty"`
+	ProjectName    string             `json:"projectName,omitempty" bson:"projectName,omitempty"`
+	Channels       *[]Channel         `json:"channels,omitempty" bson:"channels,omitempty"`
+	Members        *[]Member          `json:"projectMembers,omitempty" bson:"projectMembers,omitempty"`
+	PendingInvites *[]PendingInvite   `json:"pendingInvites,omitempty" bson:"pendingInvites,omitempty"`
+	Teamlead       string             `json:"teamlead,omitempty" bson:"teamlead,omitempty"`
+	Deadline       string             `json:"deadline,omitempty" bson:"deadline,omitempty"`
 }
 
 // Member model
@@ -80,4 +80,31 @@ func (p *Project) GetProjects(userEmail string) ([]*Project, error) {
 
 	return projects, nil
 
+}
+
+func (p *Project) AddProjectMembers(email string) error {
+	userEmail := email
+	filter := bson.M{
+		"_id": p.ProjectID,
+		"projectMembers": bson.M{
+			"$elemMatch": bson.M{
+				"email":    userEmail,
+				"userRole": "Owner",
+			},
+		},
+	}
+	var project *Project
+	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
+	err := zodeProjectCollection.FindOne(context.TODO(), filter).Decode(&project)
+	if err != nil {
+		return err
+	}
+	filter = bson.M{"_id": p.ProjectID}
+	update := bson.M{"$push": bson.M{"pendingInvites": bson.M{"$each": p.PendingInvites}}}
+	_, err = zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
