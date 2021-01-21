@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/database"
 	"go.mongodb.org/mongo-driver/bson"
@@ -62,13 +61,13 @@ func (p *Project) GetProjects(userEmail string) ([]*Project, error) {
 	cursor, err := zodeProjectCollection.Find(context.TODO(), filter, options.Find().SetProjection(projection))
 
 	if err != nil {
-		fmt.Println("Error fetching projects: ", err)
+		return []*Project{}, err
 	}
 	for cursor.Next(context.TODO()) {
 		var project Project
 		err := cursor.Decode(&project)
 		if err != nil {
-			fmt.Println("error decoding docs: ", err)
+			return []*Project{}, err
 		}
 		projects = append(projects, &project)
 	}
