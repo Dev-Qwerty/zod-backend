@@ -85,3 +85,25 @@ func AddProjectMembersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	responses.JSON(w, http.StatusOK, nil)
 }
+
+// AcceptInviteHandler creates handler for /acceptinvites route
+func AcceptInviteHandler(w http.ResponseWriter, r *http.Request) {
+	project := &models.Project{}
+	ctx := r.Context()
+	token := ctx.Value("tokenuid")
+	tokenStruct := token.(*auth.Token)
+	userDetails, _ := utils.GetUserDetails(tokenStruct.UID) // todo : handle error
+
+	err := json.NewDecoder(r.Body).Decode(&project)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	err = project.AcceptInvite(userDetails)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	responses.JSON(w, http.StatusOK, nil)
+}

@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 
+	"firebase.google.com/go/v4/auth"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/database"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -106,5 +107,51 @@ func (p *Project) AddProjectMembers(email string) error {
 		return err
 	}
 
+	return nil
+}
+
+func (p *Project) AcceptInvite(userDetails *auth.UserInfo) error {
+	var project *Project
+	userEmail := userDetails.Email
+	filter := bson.M{
+		"_id":                  p.ProjectID,
+		"pendingInvites.email": userEmail,
+	}
+	projection := bson.M{
+		"pendingInvites.$": 1,
+	}
+	// fetch role of user from db
+	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
+	err := zodeProjectCollection.FindOne(context.TODO(), filter, options.FindOne().SetProjection(projection)).Decode(&project)
+	if err != nil {
+		return err
+	}
+	pendinginvite := &[]PendingInvite{}
+	pendinginvite = project.PendingInvites
+
+	member := &Member{}
+	member.Name = userDetails.DisplayName
+	member.Email = userEmail
+	member.UserID = userDetails.UID
+	member.Role = (*pendinginvite)[0].Role
+
+	// add user to project members
+	filter = bson.M{"_id": p.ProjectID}
+	update := bson.M{"$push": bson.M{"projectMembers": member}}
+	_, err = zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return err
+	}
+
+	update = bson.M{
+		"$pull": bson.M{
+			"pendingInvites": bson.M{
+				"email": userEmail,
+			},
+		}}
+	_, err = zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return err
+	}
 	return nil
 }
