@@ -17,7 +17,7 @@ func ExtractToken(next http.Handler) http.Handler {
 
 		} else {
 			ctx := r.Context()
-			ctx = context.WithValue(ctx, "token", u.UID)
+			ctx = context.WithValue(ctx, "uid", u.UID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 	})

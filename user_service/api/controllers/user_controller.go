@@ -34,8 +34,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 func Update(w http.ResponseWriter, r *http.Request) {
 
 	data := models.UpdatedUser{}
-	ctx := r.Context()
-	data.Id = ctx.Value("token").(string)
+	data.Id = r.Context().Value("uid").(string)
 
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
