@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"firebase.google.com/go/v4/auth"
@@ -25,6 +26,13 @@ type FirebaseUser struct {
 	Lname    string `json:"lname"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+// UpdatedUser model
+type UpdatedUser struct {
+	Id    string
+	Field string
+	Value string
 }
 
 // CreateNewUser creates a new user
@@ -57,5 +65,35 @@ func CreateNewUser(user FirebaseUser) error {
 		return err
 	}
 
+	return nil
+}
+
+// UpdateUser updates the user data
+func UpdateUser(data UpdatedUser) error {
+	pguser := &User{}
+	pguser.ID = data.Id
+
+	switch data.Field {
+	case "email":
+		pguser.Email = data.Value
+		_, err := database.DB.Model(pguser).Set("email = ?email").Where("id = ?id").Update()
+		if err != nil {
+			return err
+		}
+	case "fname":
+		pguser.Fname = data.Value
+		_, err := database.DB.Model(pguser).Set("fname = ?fname").Where("id = ?id").Update()
+		if err != nil {
+			return err
+		}
+	case "lname":
+		pguser.Lname = data.Value
+		_, err := database.DB.Model(pguser).Set("lname = ?lname").Where("id = ?id").Update()
+		if err != nil {
+			return err
+		}
+	default:
+		return errors.New("Invalid field")
+	}
 	return nil
 }
