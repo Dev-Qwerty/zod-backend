@@ -7,6 +7,7 @@ import (
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/database"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -149,6 +150,63 @@ func (p *Project) AcceptInvite(userDetails *auth.UserInfo) error {
 				"email": userEmail,
 			},
 		}}
+	_, err = zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *Project) LeaveProject(email string) error {
+	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
+	// stages for Aggregate pipeline
+	matchStage := bson.D{
+		{"$match", bson.M{
+			"_id": p.ProjectID,
+		}},
+	}
+	memberCount := bson.D{
+		{"$project", bson.D{
+			{"count", bson.D{
+				{"$size", "$projectMembers"},
+			}},
+		}},
+	}
+
+	//count total no of members in the project
+	cursor, err := zodeProjectCollection.Aggregate(context.TODO(), mongo.Pipeline{matchStage, memberCount})
+	if err != nil {
+		return err
+	}
+
+	var result bson.M
+	for cursor.Next(context.TODO()) {
+		if err := cursor.Decode(&result); err != nil {
+			return err
+		}
+	}
+	cursor.Close(context.TODO())
+	// delete project if there is only one member
+	if result["count"] == int32(1) {
+		// todo: delete chat and boards in the project
+		_, err = zodeProjectCollection.DeleteOne(context.TODO(), bson.M{"_id": p.ProjectID})
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	// remove member if there is more than one member in the project
+	filter := bson.M{
+		"_id":                  p.ProjectID,
+		"projectMembers.email": email,
+	}
+	update := bson.M{
+		"$pull": bson.M{
+			"projectMembers": bson.M{
+				"email": email,
+			},
+		},
+	}
 	_, err = zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		return err
