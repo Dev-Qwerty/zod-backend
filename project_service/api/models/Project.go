@@ -213,3 +213,32 @@ func (p *Project) LeaveProject(email string) error {
 	}
 	return nil
 }
+
+func RemoveProjectMember(email, memberEmail string, projectID primitive.ObjectID) error {
+	userEmail := email
+	// check if the user is owner
+	filter := bson.M{
+		"_id": projectID,
+		"projectMembers": bson.M{
+			"$elemMatch": bson.M{
+				"email":    userEmail,
+				"userRole": "Owner",
+			},
+		},
+	}
+	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
+	update := bson.M{
+		"$pull": bson.M{
+			"projectMembers": bson.M{
+				"email": memberEmail,
+			},
+		}}
+	result, err := zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return err
+	}
+	if result.MatchedCount == 0 {
+		return err
+	}
+	return nil
+}

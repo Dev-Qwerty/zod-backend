@@ -8,6 +8,7 @@ import (
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/models"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/responses"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/utils"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // CreateProjectHandler creates the handler for createproject route
@@ -123,6 +124,29 @@ func LeaveProjectHandler(w http.ResponseWriter, r *http.Request) {
 	err = project.LeaveProject(tokenStruct.Claims["email"].(string))
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	responses.JSON(w, http.StatusOK, nil)
+}
+
+func RemoveProjectMemberHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	token := ctx.Value("tokenuid")
+	tokenStruct := token.(*auth.Token)
+
+	type Details struct {
+		ProjectID primitive.ObjectID `json:"projectID,omitempty"`
+		Email     string             `json:"email,omitempty"`
+	}
+	var detail *Details
+	err := json.NewDecoder(r.Body).Decode(&detail)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	err = models.RemoveProjectMember(tokenStruct.Claims["email"].(string), detail.Email, detail.ProjectID)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 	responses.JSON(w, http.StatusOK, nil)
