@@ -107,3 +107,23 @@ func AcceptInviteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	responses.JSON(w, http.StatusOK, nil)
 }
+
+// LeaveProjectHandler creates handler for /leaveproject route
+func LeaveProjectHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	token := ctx.Value("tokenuid")
+	tokenStruct := token.(*auth.Token)
+
+	project := &models.Project{}
+	err := json.NewDecoder(r.Body).Decode(&project)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	err = project.LeaveProject(tokenStruct.Claims["email"].(string))
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	responses.JSON(w, http.StatusOK, nil)
+}
