@@ -30,7 +30,7 @@ type FirebaseUser struct {
 
 // UpdatedUser model
 type UpdatedUser struct {
-	Id    string
+	ID    string
 	Field string
 	Value string
 }
@@ -71,7 +71,7 @@ func CreateNewUser(user FirebaseUser) error {
 // UpdateUser updates the user data
 func UpdateUser(data UpdatedUser) error {
 	pguser := &User{}
-	pguser.ID = data.Id
+	pguser.ID = data.ID
 
 	switch data.Field {
 	case "email":
@@ -95,5 +95,24 @@ func UpdateUser(data UpdatedUser) error {
 	default:
 		return errors.New("Invalid field")
 	}
+	return nil
+}
+
+// DeleteUser removes the user from firebase and postgres
+func DeleteUser(id string) error {
+	err := config.Client.DeleteUser(context.Background(), id)
+
+	if err != nil {
+		return err
+	}
+	pguser := &User{}
+
+	pguser.ID = id
+
+	_, err = database.DB.Model(pguser).Where("id = ?id").Delete()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

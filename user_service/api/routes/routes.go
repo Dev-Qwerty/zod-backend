@@ -12,4 +12,5 @@ func InitializeRoutes(r *mux.Router) {
 	etm := r.PathPrefix("/api/user/").Subrouter()
 	etm.Use(middlewares.ExtractToken)
 	etm.HandleFunc("/update", controllers.Update).Methods("PUT")
+	etm.HandleFunc("/delete", controllers.Delete).Methods("DELETE")
 }

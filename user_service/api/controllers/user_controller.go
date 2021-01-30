@@ -34,7 +34,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 func Update(w http.ResponseWriter, r *http.Request) {
 
 	data := models.UpdatedUser{}
-	data.Id = r.Context().Value("uid").(string)
+	data.ID = r.Context().Value("uid").(string)
 
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
@@ -48,5 +48,18 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		} else {
 			w.WriteHeader(http.StatusOK)
 		}
+	}
+}
+
+// Delete removes the user
+func Delete(w http.ResponseWriter, r *http.Request) {
+	uid := r.Context().Value("uid").(string)
+
+	err := models.DeleteUser(uid)
+	if err != nil {
+		fmt.Printf("Failed to delete user: %v", err)
+		http.Error(w, "Failed to delete user", http.StatusBadRequest)
+	} else {
+		w.WriteHeader(http.StatusOK)
 	}
 }
