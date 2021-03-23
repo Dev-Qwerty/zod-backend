@@ -163,3 +163,28 @@ func UpdateProject(project Project) error {
 
 	return nil
 }
+
+// Delete project of users
+func DeleteProject(project Project) error {
+
+	result, err := database.DB.Exec(`SELECT * FROM users WHERE id = '` + project.ID + `' AND '` + project.ProjectId + `' = ANY(owner);`)
+	if err != nil {
+		return err
+	}
+
+	if result.RowsReturned() == 1 {
+		_, err = database.DB.Exec(`UPDATE users SET owner = array_remove(owner, '` + project.ProjectId + `') WHERE id = '` + project.ID + `';`)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = database.DB.Exec(`UPDATE users SET projects = array_remove(projects, '` + project.ProjectId + `') WHERE id = '` + project.ID + `';`)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

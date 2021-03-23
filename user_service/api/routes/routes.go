@@ -14,7 +14,8 @@ func InitializeRoutes(r *mux.Router) {
 
 	userRouter.HandleFunc("/signup", controllers.SignUp).Methods("POST")
 	projectRouter.HandleFunc("/new", controllers.NewProject).Methods("POST")
-	projectRouter.HandleFunc("/update", controllers.UpdateProject).Methods("POST")
+	projectRouter.HandleFunc("/update", controllers.UpdateProject).Methods("PUT")
+	projectRouter.HandleFunc("/delete", controllers.DeleteProject).Methods("DELETE")
 	etm.Use(middlewares.ExtractToken)
 	etm.HandleFunc("/update", controllers.Update).Methods("PUT")
 	etm.HandleFunc("/delete", controllers.Delete).Methods("DELETE")

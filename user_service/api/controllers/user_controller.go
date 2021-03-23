@@ -102,3 +102,23 @@ func UpdateProject(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+func DeleteProject(w http.ResponseWriter, r *http.Request) {
+	project := models.Project{}
+
+	err := json.NewDecoder(r.Body).Decode(&project)
+
+	if err != nil {
+		log.Printf("Failed decoding project: %v", err)
+		http.Error(w, "Failed to delete project", http.StatusBadRequest)
+	} else {
+		err := models.DeleteProject(project)
+
+		if err != nil {
+			fmt.Printf("Failed to delete project: %v", err)
+			http.Error(w, "Failed to delete project", http.StatusBadRequest)
+		} else {
+			w.WriteHeader(http.StatusOK)
+		}
+	}
+}
