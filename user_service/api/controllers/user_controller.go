@@ -66,17 +66,57 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 
 // Add projects of user to db
 func NewProject(w http.ResponseWriter, r *http.Request) {
-	project := models.NewProject{}
+	project := models.Project{}
 
 	err := json.NewDecoder(r.Body).Decode(&project)
 	if err != nil {
 		log.Printf("Failed decoding project: %v", err)
-		http.Error(w, "Failed to update user", http.StatusBadRequest)
+		http.Error(w, "Failed to save project", http.StatusBadRequest)
 	} else {
 		err = models.AddProject(project)
 		if err != nil {
 			fmt.Printf("Failed to save project: %v", err)
 			http.Error(w, "Failed to save project", http.StatusBadRequest)
+		} else {
+			w.WriteHeader(http.StatusOK)
+		}
+	}
+}
+
+// Update project role of users
+func UpdateProject(w http.ResponseWriter, r *http.Request) {
+	project := models.Project{}
+
+	err := json.NewDecoder(r.Body).Decode(&project)
+	if err != nil {
+		log.Printf("Failed decoding project: %v", err)
+		http.Error(w, "Failed to update project", http.StatusBadRequest)
+	} else {
+		err = models.UpdateProject(project)
+
+		if err != nil {
+			fmt.Printf("Failed to update project: %v", err)
+			http.Error(w, "Failed to update project", http.StatusBadRequest)
+		} else {
+			w.WriteHeader(http.StatusOK)
+		}
+	}
+}
+
+func DeleteProject(w http.ResponseWriter, r *http.Request) {
+	project := models.Project{}
+
+	err := json.NewDecoder(r.Body).Decode(&project)
+
+	if err != nil {
+		log.Printf("Failed decoding project: %v", err)
+		http.Error(w, "Failed to delete project", http.StatusBadRequest)
+	} else {
+		err := models.DeleteProject(project)
+
+		if err != nil {
+			fmt.Printf("Failed to delete project: %v", err)
+			http.Error(w, "Failed to delete project", http.StatusBadRequest)
 		} else {
 			w.WriteHeader(http.StatusOK)
 		}
