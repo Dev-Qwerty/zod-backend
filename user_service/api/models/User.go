@@ -58,16 +58,16 @@ func CreateNewUser(user FirebaseUser) error {
 		return err
 	}
 
-	pguser := &User{}
+	newuser := &User{}
 
-	pguser.ID = u.UID
-	pguser.Fname = user.Fname
-	pguser.Lname = user.Lname
-	pguser.Email = user.Email
-	pguser.CreatedAt = time.Now()
+	newuser.ID = u.UID
+	newuser.Fname = user.Fname
+	newuser.Lname = user.Lname
+	newuser.Email = user.Email
+	newuser.CreatedAt = time.Now()
 
 	// Save user to postgres
-	_, err = database.DB.Model(pguser).Insert()
+	_, err = database.DB.Model(newuser).Insert()
 	if err != nil {
 		config.Client.DeleteUser(context.Background(), u.UID)
 		return err
@@ -78,25 +78,25 @@ func CreateNewUser(user FirebaseUser) error {
 
 // UpdateUser updates the user data
 func UpdateUser(data UpdatedUser) error {
-	pguser := &User{}
-	pguser.ID = data.ID
+	user := &User{}
+	user.ID = data.ID
 
 	switch data.Field {
 	case "email":
-		pguser.Email = data.Value
-		_, err := database.DB.Model(pguser).Set("email = ?email").Where("id = ?id").Update()
+		user.Email = data.Value
+		_, err := database.DB.Model(user).Set("email = ?email").Where("id = ?id").Update()
 		if err != nil {
 			return err
 		}
 	case "fname":
-		pguser.Fname = data.Value
-		_, err := database.DB.Model(pguser).Set("fname = ?fname").Where("id = ?id").Update()
+		user.Fname = data.Value
+		_, err := database.DB.Model(user).Set("fname = ?fname").Where("id = ?id").Update()
 		if err != nil {
 			return err
 		}
 	case "lname":
-		pguser.Lname = data.Value
-		_, err := database.DB.Model(pguser).Set("lname = ?lname").Where("id = ?id").Update()
+		user.Lname = data.Value
+		_, err := database.DB.Model(user).Set("lname = ?lname").Where("id = ?id").Update()
 		if err != nil {
 			return err
 		}
