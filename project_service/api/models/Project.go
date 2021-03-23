@@ -1,7 +1,10 @@
 package models
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"net/http"
 
 	"firebase.google.com/go/v4/auth"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/database"
@@ -153,6 +156,17 @@ func (p *Project) AcceptInvite(userDetails *auth.UserInfo) error {
 	if err != nil {
 		return err
 	}
+
+	projectDetails, _ := json.Marshal(map[string]string{
+		"ID":        userDetails.UID,
+		"ProjectID": p.ProjectID.Hex(),
+		"Role":      (*pendinginvite)[0].Role,
+	})
+
+	requestBody := bytes.NewBuffer(projectDetails)
+
+	http.Post("http://localhost:8081/api/user/project/new", "application/json", requestBody)
+
 	return nil
 }
 

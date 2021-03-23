@@ -60,7 +60,7 @@ func CreateProjectHandler(w http.ResponseWriter, r *http.Request) {
 
 	requestBody := bytes.NewBuffer(projectDetails)
 
-	http.Post("http://localhost:8080/api/user/project/new", "application/json", requestBody)
+	http.Post("http://localhost:8081/api/user/project/new", "application/json", requestBody)
 }
 
 // GetProjectsHandler is the handler for /getprojects route
