@@ -108,18 +108,25 @@ func UpdateUser(data UpdatedUser) error {
 
 // DeleteUser removes the user from firebase and postgres
 func DeleteUser(id string) error {
-	err := config.Client.DeleteUser(context.Background(), id)
-
+	user := &User{}
+	user.ID = id
+	err := database.DB.Model(user).Where("id = ?id").Select()
 	if err != nil {
 		return err
 	}
-	pguser := &User{}
+	if len(user.Role) == 0 {
+		err := config.Client.DeleteUser(context.Background(), id)
 
-	pguser.ID = id
+		if err != nil {
+			return err
+		}
+		_, err = database.DB.Model(user).Where("id = ?id").Delete()
 
-	_, err = database.DB.Model(pguser).Where("id = ?id").Delete()
-	if err != nil {
-		return err
+		if err != nil {
+			return err
+		}
+	} else {
+		return errors.New("User is owner of some projetcs")
 	}
 
 	return nil
