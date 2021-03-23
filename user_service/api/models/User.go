@@ -18,6 +18,7 @@ type User struct {
 	Email     string    `pg:"email,notnull,unique" json:"email"`
 	CreatedAt time.Time `pg:"createdat,notnull" json:"created_at"`
 	Project   []string  `pg:"projects,array" json:"projects"`
+	Role      []string  `pg:"owner,array" json:"role"`
 }
 
 // FirebaseUser model
@@ -35,6 +36,13 @@ type UpdatedUser struct {
 	Value string
 }
 
+// NewProject model
+type NewProject struct {
+	ID        string
+	ProjectId string
+	Role      string
+}
+
 // CreateNewUser creates a new user
 func CreateNewUser(user FirebaseUser) error {
 	displayName := user.Fname + " " + user.Lname
@@ -50,16 +58,16 @@ func CreateNewUser(user FirebaseUser) error {
 		return err
 	}
 
-	pguser := &User{}
+	newuser := &User{}
 
-	pguser.ID = u.UID
-	pguser.Fname = user.Fname
-	pguser.Lname = user.Lname
-	pguser.Email = user.Email
-	pguser.CreatedAt = time.Now()
+	newuser.ID = u.UID
+	newuser.Fname = user.Fname
+	newuser.Lname = user.Lname
+	newuser.Email = user.Email
+	newuser.CreatedAt = time.Now()
 
 	// Save user to postgres
-	_, err = database.DB.Model(pguser).Insert()
+	_, err = database.DB.Model(newuser).Insert()
 	if err != nil {
 		config.Client.DeleteUser(context.Background(), u.UID)
 		return err
@@ -70,46 +78,65 @@ func CreateNewUser(user FirebaseUser) error {
 
 // UpdateUser updates the user data
 func UpdateUser(data UpdatedUser) error {
-	pguser := &User{}
-	pguser.ID = data.ID
+	user := &User{}
+	user.ID = data.ID
 
 	switch data.Field {
 	case "email":
-		pguser.Email = data.Value
-		_, err := database.DB.Model(pguser).Set("email = ?email").Where("id = ?id").Update()
+		user.Email = data.Value
+		_, err := database.DB.Model(user).Set("email = ?email").Where("id = ?id").Update()
 		if err != nil {
 			return err
 		}
 	case "fname":
-		pguser.Fname = data.Value
-		_, err := database.DB.Model(pguser).Set("fname = ?fname").Where("id = ?id").Update()
+		user.Fname = data.Value
+		_, err := database.DB.Model(user).Set("fname = ?fname").Where("id = ?id").Update()
 		if err != nil {
 			return err
 		}
 	case "lname":
-		pguser.Lname = data.Value
-		_, err := database.DB.Model(pguser).Set("lname = ?lname").Where("id = ?id").Update()
+		user.Lname = data.Value
+		_, err := database.DB.Model(user).Set("lname = ?lname").Where("id = ?id").Update()
 		if err != nil {
 			return err
 		}
 	default:
-		return errors.New("Invalid field")
+		return errors.New("invalid field")
 	}
 	return nil
 }
 
 // DeleteUser removes the user from firebase and postgres
 func DeleteUser(id string) error {
-	err := config.Client.DeleteUser(context.Background(), id)
-
+	user := &User{}
+	user.ID = id
+	err := database.DB.Model(user).Where("id = ?id").Select()
 	if err != nil {
 		return err
 	}
-	pguser := &User{}
+	if len(user.Role) == 0 {
+		err := config.Client.DeleteUser(context.Background(), id)
 
-	pguser.ID = id
+		if err != nil {
+			return err
+		}
+		_, err = database.DB.Model(user).Where("id = ?id").Delete()
 
-	_, err = database.DB.Model(pguser).Where("id = ?id").Delete()
+		if err != nil {
+			return err
+		}
+	} else {
+		return errors.New("User is owner of some projetcs")
+	}
+
+	return nil
+}
+
+func AddProject(project NewProject) error {
+	_, err := database.DB.Exec(`UPDATE users SET projects = array_append(projects, '` + project.ProjectId + `') WHERE id = '` + project.ID + `';`)
+	if project.Role == "owner" {
+		_, err = database.DB.Exec(`UPDATE users SET owner = array_append(owner, '` + project.ProjectId + `') WHERE id = '` + project.ID + `';`)
+	}
 	if err != nil {
 		return err
 	}
