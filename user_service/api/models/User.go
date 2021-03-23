@@ -37,7 +37,7 @@ type UpdatedUser struct {
 }
 
 // NewProject model
-type NewProject struct {
+type Project struct {
 	ID        string
 	ProjectId string
 	Role      string
@@ -132,13 +132,33 @@ func DeleteUser(id string) error {
 	return nil
 }
 
-func AddProject(project NewProject) error {
+// Add project of user to db
+func AddProject(project Project) error {
 	_, err := database.DB.Exec(`UPDATE users SET projects = array_append(projects, '` + project.ProjectId + `') WHERE id = '` + project.ID + `';`)
 	if project.Role == "owner" {
 		_, err = database.DB.Exec(`UPDATE users SET owner = array_append(owner, '` + project.ProjectId + `') WHERE id = '` + project.ID + `';`)
 	}
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// Update project role of users
+func UpdateProject(project Project) error {
+	if project.Role == "owner" {
+		_, err := database.DB.Exec(`UPDATE users SET owner = array_append(owner, '` + project.ProjectId + `') WHERE id = '` + project.ID + `';`)
+
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err := database.DB.Exec(`UPDATE users SET owner = array_remove(owner, '` + project.ProjectId + `') WHERE id = '` + project.ID + `';`)
+
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
