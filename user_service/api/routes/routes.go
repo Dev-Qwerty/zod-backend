@@ -9,6 +9,7 @@ import (
 // InitializeRoutes init routes
 func InitializeRoutes(r *mux.Router) {
 	r.HandleFunc("/api/user/signup", controllers.SignUp).Methods("POST")
+	r.HandleFunc("/api/user/addproject", controllers.NewProject).Methods("POST")
 	etm := r.PathPrefix("/api/user/").Subrouter()
 	etm.Use(middlewares.ExtractToken)
 	etm.HandleFunc("/update", controllers.Update).Methods("PUT")

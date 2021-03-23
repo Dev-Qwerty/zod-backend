@@ -63,3 +63,22 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}
 }
+
+// Add projects of user to db
+func NewProject(w http.ResponseWriter, r *http.Request) {
+	project := models.NewProject{}
+
+	err := json.NewDecoder(r.Body).Decode(&project)
+	if err != nil {
+		log.Printf("Failed decoding project: %v", err)
+		http.Error(w, "Failed to update user", http.StatusBadRequest)
+	} else {
+		err = models.AddProject(project)
+		if err != nil {
+			fmt.Printf("Failed to save project: %v", err)
+			http.Error(w, "Failed to save project", http.StatusBadRequest)
+		} else {
+			w.WriteHeader(http.StatusOK)
+		}
+	}
+}

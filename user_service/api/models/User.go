@@ -18,6 +18,7 @@ type User struct {
 	Email     string    `pg:"email,notnull,unique" json:"email"`
 	CreatedAt time.Time `pg:"createdat,notnull" json:"created_at"`
 	Project   []string  `pg:"projects,array" json:"projects"`
+	Role      []string  `pg:"owner,array" json:"role"`
 }
 
 // FirebaseUser model
@@ -33,6 +34,13 @@ type UpdatedUser struct {
 	ID    string
 	Field string
 	Value string
+}
+
+// NewProject model
+type NewProject struct {
+	ID        string
+	ProjectId string
+	Role      string
 }
 
 // CreateNewUser creates a new user
@@ -93,7 +101,7 @@ func UpdateUser(data UpdatedUser) error {
 			return err
 		}
 	default:
-		return errors.New("Invalid field")
+		return errors.New("invalid field")
 	}
 	return nil
 }
@@ -110,6 +118,18 @@ func DeleteUser(id string) error {
 	pguser.ID = id
 
 	_, err = database.DB.Model(pguser).Where("id = ?id").Delete()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func AddProject(project NewProject) error {
+	_, err := database.DB.Exec(`UPDATE users SET projects = array_append(projects, '` + project.ProjectId + `') WHERE id = '` + project.ID + `';`)
+	if project.Role == "owner" {
+		_, err = database.DB.Exec(`UPDATE users SET owner = array_append(owner, '` + project.ProjectId + `') WHERE id = '` + project.ID + `';`)
+	}
 	if err != nil {
 		return err
 	}
