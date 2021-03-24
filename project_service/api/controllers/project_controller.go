@@ -41,6 +41,9 @@ func CreateProjectHandler(w http.ResponseWriter, r *http.Request) {
 	project.Members = &[]models.Member{}
 
 	*project.Members = append(*project.Members, *member)
+	for i := 0; i < len(*project.PendingInvites); i++ {
+		(*project.PendingInvites)[i].InvitedBy = userDetails.DisplayName
+	}
 
 	projectID, err := project.CreateProject()
 	if err != nil {

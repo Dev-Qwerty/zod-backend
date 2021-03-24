@@ -31,8 +31,9 @@ type Member struct {
 
 // PendingInvite models
 type PendingInvite struct {
-	Email string `json:"email,omitempty" bson:"email,omitempty"`
-	Role  string `json:"userRole,omitempty" bson:"userRole,omitempty"`
+	Email     string `json:"email,omitempty" bson:"email,omitempty"`
+	Role      string `json:"userRole,omitempty" bson:"userRole,omitempty"`
+	InvitedBy string `json:"invitedby,omitempty" bson:"invitedby,omitempty"`
 }
 
 // CreateProject creates a new project and save it to db
