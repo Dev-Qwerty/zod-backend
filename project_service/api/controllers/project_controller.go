@@ -76,11 +76,16 @@ func AddProjectMembersHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	token := ctx.Value("tokenuid")
 	tokenStruct := token.(*auth.Token)
+	userDetails, _ := utils.GetUserDetails(tokenStruct.UID)
 
 	err := json.NewDecoder(r.Body).Decode(&project)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
+	}
+
+	for i := 0; i < len(*project.PendingInvites); i++ {
+		(*project.PendingInvites)[i].InvitedBy = userDetails.DisplayName
 	}
 
 	err = project.AddProjectMembers(tokenStruct.Claims["email"].(string))
