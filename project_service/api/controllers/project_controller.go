@@ -50,6 +50,7 @@ func CreateProjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responses.JSON(w, http.StatusOK, projectID)
+
 }
 
 // GetProjectsHandler is the handler for /getprojects route
