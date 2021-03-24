@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"bytes"
 	"encoding/json"
 	"net/http"
 
@@ -52,15 +51,6 @@ func CreateProjectHandler(w http.ResponseWriter, r *http.Request) {
 
 	responses.JSON(w, http.StatusOK, projectID)
 
-	projectDetails, _ := json.Marshal(map[string]string{
-		"ID":        userDetails.UID,
-		"ProjectID": projectID,
-		"Role":      "Owner",
-	})
-
-	requestBody := bytes.NewBuffer(projectDetails)
-
-	http.Post("http://localhost:8081/api/user/project/new", "application/json", requestBody)
 }
 
 // GetProjectsHandler is the handler for /getprojects route
