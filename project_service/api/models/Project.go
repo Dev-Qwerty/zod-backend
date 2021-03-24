@@ -161,14 +161,14 @@ func (p *Project) LeaveProject(email string) error {
 	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
 	// stages for Aggregate pipeline
 	matchStage := bson.D{
-		{"$match", bson.M{
+		primitive.E{Key: "$match", Value: bson.M{
 			"_id": p.ProjectID,
 		}},
 	}
 	memberCount := bson.D{
-		{"$project", bson.D{
-			{"count", bson.D{
-				{"$size", "$projectMembers"},
+		primitive.E{Key: "$project", Value: bson.D{
+			primitive.E{Key: "count", Value: bson.D{
+				primitive.E{Key: "$size", Value: "$projectMembers"},
 			}},
 		}},
 	}
