@@ -8,6 +8,7 @@ import (
 	"firebase.google.com/go/v4/auth"
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/config"
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/database"
+	"github.com/Dev-Qwerty/zod-backend/user_service/api/utilities"
 )
 
 // User model
@@ -70,6 +71,11 @@ func CreateNewUser(user FirebaseUser) error {
 	_, err = database.DB.Model(newuser).Insert()
 	if err != nil {
 		config.Client.DeleteUser(context.Background(), u.UID)
+		return err
+	}
+
+	err = utilities.SendEmailVerificationLink(user.Email)
+	if err != nil {
 		return err
 	}
 
