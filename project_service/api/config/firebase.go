@@ -14,7 +14,7 @@ var Client *auth.Client
 
 // InitializeFirebase creates a new Firebase auth client
 func InitializeFirebase() error {
-	opt := option.WithCredentialsFile("/home/albin/ServiceAccountKey-zode.json")
+	opt := option.WithCredentialsFile("E:\\ServiceAccountKey-zode.json")
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		log.Fatalf("error initializing app: %v\n", err)
