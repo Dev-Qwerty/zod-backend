@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"fmt"
 
 	"firebase.google.com/go/v4/auth"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/database"
@@ -31,8 +32,9 @@ type Member struct {
 
 // PendingInvite models
 type PendingInvite struct {
-	Email string `json:"email,omitempty" bson:"email,omitempty"`
-	Role  string `json:"userRole,omitempty" bson:"userRole,omitempty"`
+	Email     string `json:"email,omitempty" bson:"email,omitempty"`
+	Role      string `json:"userRole,omitempty" bson:"userRole,omitempty"`
+	InvitedBy string `json:"invitedby,omitempty" bson:"invitedby,omitempty"`
 }
 
 // CreateProject creates a new project and save it to db
@@ -241,4 +243,48 @@ func RemoveProjectMember(email, memberEmail string, projectID primitive.ObjectID
 		return err
 	}
 	return nil
+}
+
+func GetPendingInvites(email string) ([]map[string]interface{}, error) {
+	fmt.Println("get invites")
+	var invites []map[string]interface{}
+	projection := bson.M{
+		"projectName":               1,
+		"teamlead":                  1,
+		"pendingInvites.userRole.$": 1,
+	}
+
+	filter := bson.M{
+		"pendingInvites": bson.M{
+			"$elemMatch": bson.M{
+				"email": email,
+			},
+		},
+	}
+	fmt.Println(email)
+	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
+	cursor, err := zodeProjectCollection.Find(context.TODO(), filter, options.Find().SetProjection(projection))
+
+	if err != nil {
+		fmt.Println(err)
+		return invites, err
+	}
+	var invite map[string]interface{}
+	for cursor.Next(context.TODO()) {
+
+		err := cursor.Decode(&invite)
+		if err != nil {
+			fmt.Println(err)
+			return invites, err
+		}
+		invites = append(invites, invite)
+	}
+
+	cursor.Close(context.TODO())
+
+	if err := cursor.Err(); err != nil {
+		return invites, err
+	}
+
+	return invites, nil
 }

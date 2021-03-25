@@ -41,6 +41,9 @@ func CreateProjectHandler(w http.ResponseWriter, r *http.Request) {
 	project.Members = &[]models.Member{}
 
 	*project.Members = append(*project.Members, *member)
+	for i := 0; i < len(*project.PendingInvites); i++ {
+		(*project.PendingInvites)[i].InvitedBy = userDetails.DisplayName
+	}
 
 	projectID, err := project.CreateProject()
 	if err != nil {
@@ -73,11 +76,16 @@ func AddProjectMembersHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	token := ctx.Value("tokenuid")
 	tokenStruct := token.(*auth.Token)
+	userDetails, _ := utils.GetUserDetails(tokenStruct.UID)
 
 	err := json.NewDecoder(r.Body).Decode(&project)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
+	}
+
+	for i := 0; i < len(*project.PendingInvites); i++ {
+		(*project.PendingInvites)[i].InvitedBy = userDetails.DisplayName
 	}
 
 	err = project.AddProjectMembers(tokenStruct.Claims["email"].(string))
@@ -151,4 +159,17 @@ func RemoveProjectMemberHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	responses.JSON(w, http.StatusOK, nil)
+}
+
+func GetPendingInvitesHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	token := ctx.Value("tokenuid")
+	tokenStruct := token.(*auth.Token)
+
+	invites, err := models.GetPendingInvites(tokenStruct.Claims["email"].(string))
+
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+	}
+	responses.JSON(w, http.StatusOK, invites)
 }
