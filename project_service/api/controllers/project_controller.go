@@ -160,3 +160,16 @@ func RemoveProjectMemberHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	responses.JSON(w, http.StatusOK, nil)
 }
+
+func GetPendingInvitesHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	token := ctx.Value("tokenuid")
+	tokenStruct := token.(*auth.Token)
+
+	invites, err := models.GetPendingInvites(tokenStruct.Claims["email"].(string))
+
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+	}
+	responses.JSON(w, http.StatusOK, invites)
+}
