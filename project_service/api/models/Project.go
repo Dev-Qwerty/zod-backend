@@ -166,6 +166,23 @@ func (p *Project) AcceptInvite(userDetails *auth.UserInfo) error {
 	return nil
 }
 
+func (p *Project) RejectInvite(userDetails *auth.UserInfo) error {
+	filter := bson.M{"_id": p.ProjectID}
+	update := bson.M{
+		"$pull": bson.M{
+			"pendingInvites": bson.M{
+				"email": userDetails.Email,
+			},
+		}}
+	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
+	_, err := zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (p *Project) LeaveProject(email string) error {
 	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
 	// stages for Aggregate pipeline
