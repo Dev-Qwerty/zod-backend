@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"firebase.google.com/go/v4/auth"
@@ -240,14 +241,13 @@ func (p *Project) LeaveProject(email string) error {
 	return nil
 }
 
-func RemoveProjectMember(email, memberEmail string, projectID primitive.ObjectID) error {
-	userEmail := email
+func RemoveProjectMember(email, memberID string, projectID string) error {
 	// check if the user is owner
 	filter := bson.M{
 		"_id": projectID,
 		"projectMembers": bson.M{
 			"$elemMatch": bson.M{
-				"email":    userEmail,
+				"email":    email,
 				"userRole": "Owner",
 			},
 		},
@@ -256,7 +256,7 @@ func RemoveProjectMember(email, memberEmail string, projectID primitive.ObjectID
 	update := bson.M{
 		"$pull": bson.M{
 			"projectMembers": bson.M{
-				"email": memberEmail,
+				"memberID": memberID,
 			},
 		}}
 	result, err := zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
@@ -264,7 +264,7 @@ func RemoveProjectMember(email, memberEmail string, projectID primitive.ObjectID
 		return err
 	}
 	if result.MatchedCount == 0 {
-		return err
+		return errors.New("unable to remove member")
 	}
 	return nil
 }

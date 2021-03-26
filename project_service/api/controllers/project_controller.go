@@ -9,7 +9,6 @@ import (
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/responses"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/utils"
 	uuid "github.com/satori/go.uuid"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // CreateProjectHandler creates the handler for createproject route
@@ -177,8 +176,8 @@ func RemoveProjectMemberHandler(w http.ResponseWriter, r *http.Request) {
 	tokenStruct := token.(*auth.Token)
 
 	type Details struct {
-		ProjectID primitive.ObjectID `json:"projectID,omitempty"`
-		Email     string             `json:"email,omitempty"`
+		ProjectID string `json:"projectID,omitempty"`
+		MemberID  string `json:"memberID,omitempty"`
 	}
 	var detail *Details
 	err := json.NewDecoder(r.Body).Decode(&detail)
@@ -186,7 +185,7 @@ func RemoveProjectMemberHandler(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	err = models.RemoveProjectMember(tokenStruct.Claims["email"].(string), detail.Email, detail.ProjectID)
+	err = models.RemoveProjectMember(tokenStruct.Claims["email"].(string), detail.MemberID, detail.ProjectID)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
