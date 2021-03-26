@@ -6,6 +6,7 @@ import (
 
 	"firebase.google.com/go/v4/auth"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/database"
+	uuid "github.com/satori/go.uuid"
 	"github.com/segmentio/ksuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -140,6 +141,8 @@ func (p *Project) AcceptInvite(userDetails *auth.UserInfo) error {
 	member.Email = userEmail
 	member.UserID = userDetails.UID
 	member.Role = (*pendinginvite)[0].Role
+	MemberID := uuid.NewV4().String()
+	member.MemberID = MemberID[24:]
 
 	// add user to project members
 	filter = bson.M{"_id": p.ProjectID}
