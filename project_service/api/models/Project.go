@@ -25,10 +25,11 @@ type Project struct {
 
 // Member model
 type Member struct {
-	Name   string `json:"name,omitempty" bson:"name,omitempty"`
-	UserID string `json:"userID,omitempty" bson:"userID,omitempty"`
-	Email  string `json:"email,omitempty" bson:"email,omitempty"`
-	Role   string `json:"userRole,omitempty" bson:"userRole,omitempty"`
+	Name     string `json:"name,omitempty" bson:"name,omitempty"`
+	UserID   string `json:"userID,omitempty" bson:"userID,omitempty"`
+	MemberID string `json:"memberID,omitempty" bson:"memberID,omitempty"`
+	Email    string `json:"email,omitempty" bson:"email,omitempty"`
+	Role     string `json:"userRole,omitempty" bson:"userRole,omitempty"`
 }
 
 // PendingInvite models

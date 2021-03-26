@@ -8,6 +8,7 @@ import (
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/models"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/responses"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/utils"
+	uuid "github.com/satori/go.uuid"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -37,6 +38,8 @@ func CreateProjectHandler(w http.ResponseWriter, r *http.Request) {
 	member.Email = userDetails.Email
 	member.UserID = userDetails.UID
 	member.Role = "Owner"
+	MemberID := uuid.NewV4().String()
+	member.MemberID = MemberID[24:]
 
 	project.Members = &[]models.Member{}
 
