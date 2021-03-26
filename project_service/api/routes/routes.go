@@ -14,6 +14,7 @@ func InitializeRoutes(r *mux.Router) {
 	s.HandleFunc("/getprojects", controllers.GetProjectsHandler).Methods("GET")
 	s.HandleFunc("/addnewprojectmembers", controllers.AddProjectMembersHandler).Methods("POST")
 	s.HandleFunc("/acceptInvite", controllers.AcceptInviteHandler).Methods("PUT")
+	s.HandleFunc("/rejectinvite", controllers.RejectInviteHandler).Methods("PUT")
 	s.HandleFunc("/leaveproject", controllers.LeaveProjectHandler).Methods("PUT")
 	s.HandleFunc("/removemember", controllers.RemoveProjectMemberHandler).Methods("PUT")
 	s.HandleFunc("/invites", controllers.GetPendingInvitesHandler).Methods("GET")
