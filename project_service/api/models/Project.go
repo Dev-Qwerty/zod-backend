@@ -6,6 +6,7 @@ import (
 
 	"firebase.google.com/go/v4/auth"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/database"
+	"github.com/segmentio/ksuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -14,12 +15,12 @@ import (
 
 // Project model
 type Project struct {
-	ProjectID      primitive.ObjectID `json:"projectID,omitempty" bson:"_id,omitempty"`
-	ProjectName    string             `json:"projectName,omitempty" bson:"projectName,omitempty"`
-	Members        *[]Member          `json:"projectMembers,omitempty" bson:"projectMembers,omitempty"`
-	PendingInvites *[]PendingInvite   `json:"pendingInvites,omitempty" bson:"pendingInvites,omitempty"`
-	Teamlead       string             `json:"teamlead,omitempty" bson:"teamlead,omitempty"`
-	Deadline       string             `json:"deadline,omitempty" bson:"deadline,omitempty"`
+	ProjectID      string           `json:"projectID,omitempty" bson:"_id,omitempty"`
+	ProjectName    string           `json:"projectName,omitempty" bson:"projectName,omitempty"`
+	Members        *[]Member        `json:"projectMembers,omitempty" bson:"projectMembers,omitempty"`
+	PendingInvites *[]PendingInvite `json:"pendingInvites,omitempty" bson:"pendingInvites,omitempty"`
+	Teamlead       string           `json:"teamlead,omitempty" bson:"teamlead,omitempty"`
+	Deadline       string           `json:"deadline,omitempty" bson:"deadline,omitempty"`
 }
 
 // Member model
@@ -40,11 +41,12 @@ type PendingInvite struct {
 // CreateProject creates a new project and save it to db
 func (p *Project) CreateProject() (string, error) {
 	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
+	p.ProjectID = ksuid.New().String()
 	createdProjectID, err := zodeProjectCollection.InsertOne(context.TODO(), p)
 	if err != nil {
 		return "", err
 	}
-	id := createdProjectID.InsertedID.(primitive.ObjectID).Hex()
+	id := createdProjectID.InsertedID.(string)
 	return id, nil
 }
 
