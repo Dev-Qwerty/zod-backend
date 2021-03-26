@@ -34,6 +34,7 @@ type Member struct {
 
 // PendingInvite models
 type PendingInvite struct {
+	Name      string `json:"name,omitempty" bson:"name,omitempty"`
 	Email     string `json:"email,omitempty" bson:"email,omitempty"`
 	Role      string `json:"userRole,omitempty" bson:"userRole,omitempty"`
 	InvitedBy string `json:"invitedby,omitempty" bson:"invitedby,omitempty"`
