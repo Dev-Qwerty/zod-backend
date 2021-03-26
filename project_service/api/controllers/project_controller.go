@@ -46,6 +46,11 @@ func CreateProjectHandler(w http.ResponseWriter, r *http.Request) {
 	*project.Members = append(*project.Members, *member)
 	for i := 0; i < len(*project.PendingInvites); i++ {
 		(*project.PendingInvites)[i].InvitedBy = userDetails.DisplayName
+		(*project.PendingInvites)[i].Name, err = utils.GetUserDetailsByEmail((*project.PendingInvites)[i].Email)
+		if err != nil {
+			responses.ERROR(w, http.StatusUnprocessableEntity, err)
+			return
+		}
 	}
 
 	projectID, err := project.CreateProject()
