@@ -342,3 +342,49 @@ func TeamMembers(projectid string) (map[string]interface{}, error) {
 
 	return member, nil
 }
+
+func ChangeMemberRole(requestBody map[string]string, email string) error {
+	filter := bson.M{
+		"_id": requestBody["projectID"],
+		"projectMembers": bson.M{
+			"$elemMatch": bson.M{
+				"email":    email,
+				"userRole": "Owner",
+			},
+		},
+	}
+
+	var project *Project
+	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
+	err := zodeProjectCollection.FindOne(context.TODO(), filter).Decode(&project)
+	if err != nil {
+		return err
+	}
+
+	filter = bson.M{
+		"_id": requestBody["projectID"],
+		"projectMembers": bson.M{
+			"$elemMatch": bson.M{
+				"memberID": requestBody["memberID"],
+			},
+		},
+	}
+
+	update := bson.M{
+		"$set": bson.M{
+			"projectMembers.$.userRole": requestBody["newRole"],
+		},
+	}
+
+	updatedDetails, err := zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return err
+	}
+
+	if updatedDetails.MatchedCount == 1 && updatedDetails.ModifiedCount == 1 {
+		return nil
+	} else {
+		return errors.New("unable to change role")
+	}
+
+}
