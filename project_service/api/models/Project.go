@@ -3,7 +3,6 @@ package models
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"firebase.google.com/go/v4/auth"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/database"
@@ -270,7 +269,6 @@ func RemoveProjectMember(email, memberID string, projectID string) error {
 }
 
 func GetPendingInvites(email string) ([]map[string]interface{}, error) {
-	fmt.Println("get invites")
 	var invites []map[string]interface{}
 	projection := bson.M{
 		"projectName":               1,
@@ -285,12 +283,10 @@ func GetPendingInvites(email string) ([]map[string]interface{}, error) {
 			},
 		},
 	}
-	fmt.Println(email)
 	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
 	cursor, err := zodeProjectCollection.Find(context.TODO(), filter, options.Find().SetProjection(projection))
 
 	if err != nil {
-		fmt.Println(err)
 		return invites, err
 	}
 	var invite map[string]interface{}
@@ -298,7 +294,6 @@ func GetPendingInvites(email string) ([]map[string]interface{}, error) {
 
 		err := cursor.Decode(&invite)
 		if err != nil {
-			fmt.Println(err)
 			return invites, err
 		}
 		invites = append(invites, invite)
@@ -311,4 +306,39 @@ func GetPendingInvites(email string) ([]map[string]interface{}, error) {
 	}
 
 	return invites, nil
+}
+
+func TeamMembers(projectid string) (map[string]interface{}, error) {
+	var member map[string]interface{}
+	projection := bson.M{
+		"projectMembers.name":     1,
+		"projectMembers.userRole": 1,
+		"projectMembers.memberID": 1,
+		"_id":                     0,
+	}
+
+	filter := bson.M{
+		"_id": projectid,
+	}
+	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
+	cursor, err := zodeProjectCollection.Find(context.TODO(), filter, options.Find().SetProjection(projection))
+	if err != nil {
+		return member, err
+	}
+
+	for cursor.Next(context.TODO()) {
+
+		err := cursor.Decode(&member)
+		if err != nil {
+			return member, err
+		}
+	}
+
+	cursor.Close(context.TODO())
+
+	if err := cursor.Err(); err != nil {
+		return member, err
+	}
+
+	return member, nil
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/models"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/responses"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/utils"
+	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -204,4 +205,13 @@ func GetPendingInvitesHandler(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusBadRequest, err)
 	}
 	responses.JSON(w, http.StatusOK, invites)
+}
+
+func GetTeamMembers(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	members, err := models.TeamMembers(vars["projectID"])
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+	}
+	responses.JSON(w, http.StatusOK, members)
 }
