@@ -215,3 +215,21 @@ func GetTeamMembers(w http.ResponseWriter, r *http.Request) {
 	}
 	responses.JSON(w, http.StatusOK, members)
 }
+
+func ChangeMemberRoleHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	token := ctx.Value("tokenuid")
+	tokenStruct := token.(*auth.Token)
+	var requestBody map[string]string
+	err := json.NewDecoder(r.Body).Decode(&requestBody)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+	}
+
+	err = models.ChangeMemberRole(requestBody, tokenStruct.Claims["email"].(string))
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+	} else {
+		responses.JSON(w, http.StatusOK, "Updated user role")
+	}
+}
