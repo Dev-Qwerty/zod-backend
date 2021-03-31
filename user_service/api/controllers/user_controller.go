@@ -44,7 +44,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		err := models.UpdateUser(data)
 		if err != nil {
 			fmt.Printf("Failed to update user: %v", err)
-			http.Error(w, "Failed to update user", http.StatusBadRequest)
+			http.Error(w, "Failed to update user", http.StatusInternalServerError)
 		} else {
 			w.WriteHeader(http.StatusOK)
 		}
@@ -58,9 +58,9 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	err := models.DeleteUser(uid)
 	if err != nil {
 		fmt.Printf("Failed to delete user: %v", err)
-		http.Error(w, "Failed to delete user", http.StatusBadRequest)
+		http.Error(w, "Failed to delete user", http.StatusInternalServerError)
 	} else {
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 
@@ -76,7 +76,7 @@ func NewProject(w http.ResponseWriter, r *http.Request) {
 		err = models.AddProject(project)
 		if err != nil {
 			fmt.Printf("Failed to save project: %v", err)
-			http.Error(w, "Failed to save project", http.StatusBadRequest)
+			http.Error(w, "Failed to save project", http.StatusInternalServerError)
 		} else {
 			w.WriteHeader(http.StatusOK)
 		}
@@ -96,7 +96,7 @@ func UpdateProject(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			fmt.Printf("Failed to update project: %v", err)
-			http.Error(w, "Failed to update project", http.StatusBadRequest)
+			http.Error(w, "Failed to update project", http.StatusInternalServerError)
 		} else {
 			w.WriteHeader(http.StatusOK)
 		}
@@ -116,7 +116,7 @@ func DeleteProject(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			fmt.Printf("Failed to delete project: %v", err)
-			http.Error(w, "Failed to delete project", http.StatusBadRequest)
+			http.Error(w, "Failed to delete project", http.StatusInternalServerError)
 		} else {
 			w.WriteHeader(http.StatusOK)
 		}
