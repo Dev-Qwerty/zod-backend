@@ -8,7 +8,8 @@ import (
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/models"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/responses"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/utils"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/gorilla/mux"
+	uuid "github.com/satori/go.uuid"
 )
 
 // CreateProjectHandler creates the handler for createproject route
@@ -37,10 +38,20 @@ func CreateProjectHandler(w http.ResponseWriter, r *http.Request) {
 	member.Email = userDetails.Email
 	member.UserID = userDetails.UID
 	member.Role = "Owner"
+	MemberID := uuid.NewV4().String()
+	member.MemberID = MemberID[24:]
 
 	project.Members = &[]models.Member{}
 
 	*project.Members = append(*project.Members, *member)
+	for i := 0; i < len(*project.PendingInvites); i++ {
+		(*project.PendingInvites)[i].InvitedBy = userDetails.DisplayName
+		(*project.PendingInvites)[i].Name, err = utils.GetUserDetailsByEmail((*project.PendingInvites)[i].Email)
+		if err != nil {
+			responses.ERROR(w, http.StatusUnprocessableEntity, err)
+			return
+		}
+	}
 
 	projectID, err := project.CreateProject()
 	if err != nil {
@@ -73,11 +84,21 @@ func AddProjectMembersHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	token := ctx.Value("tokenuid")
 	tokenStruct := token.(*auth.Token)
+	userDetails, _ := utils.GetUserDetails(tokenStruct.UID)
 
 	err := json.NewDecoder(r.Body).Decode(&project)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
+	}
+
+	for i := 0; i < len(*project.PendingInvites); i++ {
+		(*project.PendingInvites)[i].InvitedBy = userDetails.DisplayName
+		(*project.PendingInvites)[i].Name, err = utils.GetUserDetailsByEmail((*project.PendingInvites)[i].Email)
+		if err != nil {
+			responses.ERROR(w, http.StatusUnprocessableEntity, err)
+			return
+		}
 	}
 
 	err = project.AddProjectMembers(tokenStruct.Claims["email"].(string))
@@ -103,6 +124,26 @@ func AcceptInviteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = project.AcceptInvite(userDetails)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	responses.JSON(w, http.StatusOK, nil)
+}
+
+func RejectInviteHandler(w http.ResponseWriter, r *http.Request) {
+	project := &models.Project{}
+	ctx := r.Context()
+	token := ctx.Value("tokenuid")
+	tokenStruct := token.(*auth.Token)
+	userDetals, _ := utils.GetUserDetails(tokenStruct.UID) // todo: handle error
+
+	err := json.NewDecoder(r.Body).Decode(&project)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	err = project.RejectInvite(userDetals)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
@@ -136,8 +177,8 @@ func RemoveProjectMemberHandler(w http.ResponseWriter, r *http.Request) {
 	tokenStruct := token.(*auth.Token)
 
 	type Details struct {
-		ProjectID primitive.ObjectID `json:"projectID,omitempty"`
-		Email     string             `json:"email,omitempty"`
+		ProjectID string `json:"projectID,omitempty"`
+		MemberID  string `json:"memberID,omitempty"`
 	}
 	var detail *Details
 	err := json.NewDecoder(r.Body).Decode(&detail)
@@ -145,10 +186,50 @@ func RemoveProjectMemberHandler(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	err = models.RemoveProjectMember(tokenStruct.Claims["email"].(string), detail.Email, detail.ProjectID)
+	err = models.RemoveProjectMember(tokenStruct.Claims["email"].(string), detail.MemberID, detail.ProjectID)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 	responses.JSON(w, http.StatusOK, nil)
+}
+
+func GetPendingInvitesHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	token := ctx.Value("tokenuid")
+	tokenStruct := token.(*auth.Token)
+
+	invites, err := models.GetPendingInvites(tokenStruct.Claims["email"].(string))
+
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+	}
+	responses.JSON(w, http.StatusOK, invites)
+}
+
+func GetTeamMembers(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	members, err := models.TeamMembers(vars["projectID"])
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+	}
+	responses.JSON(w, http.StatusOK, members)
+}
+
+func ChangeMemberRoleHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	token := ctx.Value("tokenuid")
+	tokenStruct := token.(*auth.Token)
+	var requestBody map[string]string
+	err := json.NewDecoder(r.Body).Decode(&requestBody)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+	}
+
+	err = models.ChangeMemberRole(requestBody, tokenStruct.Claims["email"].(string))
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+	} else {
+		responses.JSON(w, http.StatusOK, "Updated user role")
+	}
 }

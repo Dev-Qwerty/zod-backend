@@ -2,9 +2,12 @@ package models
 
 import (
 	"context"
+	"errors"
 
 	"firebase.google.com/go/v4/auth"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/database"
+	uuid "github.com/satori/go.uuid"
+	"github.com/segmentio/ksuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -13,36 +16,40 @@ import (
 
 // Project model
 type Project struct {
-	ProjectID      primitive.ObjectID `json:"projectID,omitempty" bson:"_id,omitempty"`
-	ProjectName    string             `json:"projectName,omitempty" bson:"projectName,omitempty"`
-	Members        *[]Member          `json:"projectMembers,omitempty" bson:"projectMembers,omitempty"`
-	PendingInvites *[]PendingInvite   `json:"pendingInvites,omitempty" bson:"pendingInvites,omitempty"`
-	Teamlead       string             `json:"teamlead,omitempty" bson:"teamlead,omitempty"`
-	Deadline       string             `json:"deadline,omitempty" bson:"deadline,omitempty"`
+	ProjectID      string           `json:"projectID,omitempty" bson:"_id,omitempty"`
+	ProjectName    string           `json:"projectName,omitempty" bson:"projectName,omitempty"`
+	Members        *[]Member        `json:"projectMembers,omitempty" bson:"projectMembers,omitempty"`
+	PendingInvites *[]PendingInvite `json:"pendingInvites,omitempty" bson:"pendingInvites,omitempty"`
+	Teamlead       string           `json:"teamlead,omitempty" bson:"teamlead,omitempty"`
+	Deadline       string           `json:"deadline,omitempty" bson:"deadline,omitempty"`
 }
 
 // Member model
 type Member struct {
-	Name   string `json:"name,omitempty" bson:"name,omitempty"`
-	UserID string `json:"userID,omitempty" bson:"userID,omitempty"`
-	Email  string `json:"email,omitempty" bson:"email,omitempty"`
-	Role   string `json:"userRole,omitempty" bson:"userRole,omitempty"`
+	Name     string `json:"name,omitempty" bson:"name,omitempty"`
+	UserID   string `json:"userID,omitempty" bson:"userID,omitempty"`
+	MemberID string `json:"memberID,omitempty" bson:"memberID,omitempty"`
+	Email    string `json:"email,omitempty" bson:"email,omitempty"`
+	Role     string `json:"userRole,omitempty" bson:"userRole,omitempty"`
 }
 
 // PendingInvite models
 type PendingInvite struct {
-	Email string `json:"email,omitempty" bson:"email,omitempty"`
-	Role  string `json:"userRole,omitempty" bson:"userRole,omitempty"`
+	Name      string `json:"name,omitempty" bson:"name,omitempty"`
+	Email     string `json:"email,omitempty" bson:"email,omitempty"`
+	Role      string `json:"userRole,omitempty" bson:"userRole,omitempty"`
+	InvitedBy string `json:"invitedby,omitempty" bson:"invitedby,omitempty"`
 }
 
 // CreateProject creates a new project and save it to db
 func (p *Project) CreateProject() (string, error) {
 	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
+	p.ProjectID = ksuid.New().String()
 	createdProjectID, err := zodeProjectCollection.InsertOne(context.TODO(), p)
 	if err != nil {
 		return "", err
 	}
-	id := createdProjectID.InsertedID.(primitive.ObjectID).Hex()
+	id := createdProjectID.InsertedID.(string)
 	return id, nil
 }
 
@@ -134,6 +141,8 @@ func (p *Project) AcceptInvite(userDetails *auth.UserInfo) error {
 	member.Email = userEmail
 	member.UserID = userDetails.UID
 	member.Role = (*pendinginvite)[0].Role
+	MemberID := uuid.NewV4().String()
+	member.MemberID = MemberID[24:]
 
 	// add user to project members
 	filter = bson.M{"_id": p.ProjectID}
@@ -150,6 +159,23 @@ func (p *Project) AcceptInvite(userDetails *auth.UserInfo) error {
 			},
 		}}
 	_, err = zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *Project) RejectInvite(userDetails *auth.UserInfo) error {
+	filter := bson.M{"_id": p.ProjectID}
+	update := bson.M{
+		"$pull": bson.M{
+			"pendingInvites": bson.M{
+				"email": userDetails.Email,
+			},
+		}}
+	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
+	_, err := zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		return err
 	}
@@ -214,14 +240,13 @@ func (p *Project) LeaveProject(email string) error {
 	return nil
 }
 
-func RemoveProjectMember(email, memberEmail string, projectID primitive.ObjectID) error {
-	userEmail := email
+func RemoveProjectMember(email, memberID string, projectID string) error {
 	// check if the user is owner
 	filter := bson.M{
 		"_id": projectID,
 		"projectMembers": bson.M{
 			"$elemMatch": bson.M{
-				"email":    userEmail,
+				"email":    email,
 				"userRole": "Owner",
 			},
 		},
@@ -230,7 +255,7 @@ func RemoveProjectMember(email, memberEmail string, projectID primitive.ObjectID
 	update := bson.M{
 		"$pull": bson.M{
 			"projectMembers": bson.M{
-				"email": memberEmail,
+				"memberID": memberID,
 			},
 		}}
 	result, err := zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
@@ -238,7 +263,128 @@ func RemoveProjectMember(email, memberEmail string, projectID primitive.ObjectID
 		return err
 	}
 	if result.MatchedCount == 0 {
-		return err
+		return errors.New("unable to remove member")
 	}
 	return nil
+}
+
+func GetPendingInvites(email string) ([]map[string]interface{}, error) {
+	var invites []map[string]interface{}
+	projection := bson.M{
+		"projectName":               1,
+		"teamlead":                  1,
+		"pendingInvites.userRole.$": 1,
+	}
+
+	filter := bson.M{
+		"pendingInvites": bson.M{
+			"$elemMatch": bson.M{
+				"email": email,
+			},
+		},
+	}
+	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
+	cursor, err := zodeProjectCollection.Find(context.TODO(), filter, options.Find().SetProjection(projection))
+
+	if err != nil {
+		return invites, err
+	}
+	var invite map[string]interface{}
+	for cursor.Next(context.TODO()) {
+
+		err := cursor.Decode(&invite)
+		if err != nil {
+			return invites, err
+		}
+		invites = append(invites, invite)
+	}
+
+	cursor.Close(context.TODO())
+
+	if err := cursor.Err(); err != nil {
+		return invites, err
+	}
+
+	return invites, nil
+}
+
+func TeamMembers(projectid string) (map[string]interface{}, error) {
+	var member map[string]interface{}
+	projection := bson.M{
+		"projectMembers.name":     1,
+		"projectMembers.userRole": 1,
+		"projectMembers.memberID": 1,
+		"_id":                     0,
+	}
+
+	filter := bson.M{
+		"_id": projectid,
+	}
+	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
+	cursor, err := zodeProjectCollection.Find(context.TODO(), filter, options.Find().SetProjection(projection))
+	if err != nil {
+		return member, err
+	}
+
+	for cursor.Next(context.TODO()) {
+
+		err := cursor.Decode(&member)
+		if err != nil {
+			return member, err
+		}
+	}
+
+	cursor.Close(context.TODO())
+
+	if err := cursor.Err(); err != nil {
+		return member, err
+	}
+
+	return member, nil
+}
+
+func ChangeMemberRole(requestBody map[string]string, email string) error {
+	filter := bson.M{
+		"_id": requestBody["projectID"],
+		"projectMembers": bson.M{
+			"$elemMatch": bson.M{
+				"email":    email,
+				"userRole": "Owner",
+			},
+		},
+	}
+
+	var project *Project
+	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
+	err := zodeProjectCollection.FindOne(context.TODO(), filter).Decode(&project)
+	if err != nil {
+		return err
+	}
+
+	filter = bson.M{
+		"_id": requestBody["projectID"],
+		"projectMembers": bson.M{
+			"$elemMatch": bson.M{
+				"memberID": requestBody["memberID"],
+			},
+		},
+	}
+
+	update := bson.M{
+		"$set": bson.M{
+			"projectMembers.$.userRole": requestBody["newRole"],
+		},
+	}
+
+	updatedDetails, err := zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return err
+	}
+
+	if updatedDetails.MatchedCount == 1 && updatedDetails.ModifiedCount == 1 {
+		return nil
+	} else {
+		return errors.New("unable to change role")
+	}
+
 }

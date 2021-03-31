@@ -15,3 +15,11 @@ func GetUserDetails(uid string) (*auth.UserInfo, error) {
 	}
 	return u.UserInfo, nil
 }
+
+func GetUserDetailsByEmail(email string) (string, error) {
+	u, err := config.Client.GetUserByEmail(context.TODO(), email)
+	if err != nil {
+		return "", err
+	}
+	return u.DisplayName, nil
+}
