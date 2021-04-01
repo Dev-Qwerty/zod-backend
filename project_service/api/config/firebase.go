@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"log"
+	"os"
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"
@@ -14,7 +15,7 @@ var Client *auth.Client
 
 // InitializeFirebase creates a new Firebase auth client
 func InitializeFirebase() error {
-	opt := option.WithCredentialsFile("E:\\ServiceAccountKey-zode.json")
+	opt := option.WithCredentialsJSON([]byte(os.Getenv("FIREBASE_CREDENTIALS_JSON")))
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		log.Fatalf("error initializing app: %v\n", err)

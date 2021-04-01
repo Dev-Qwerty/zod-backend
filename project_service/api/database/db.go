@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -16,12 +17,11 @@ var Client *mongo.Client
 // InitializeDB initialized DB
 func InitializeDB() {
 	var err error
-	uri := "mongodb://localhost:27017"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	Client, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	Client, err = mongo.Connect(ctx, options.Client().ApplyURI(os.Getenv("MONGO_URL")))
 
 	if err != nil {
 		panic(err)
