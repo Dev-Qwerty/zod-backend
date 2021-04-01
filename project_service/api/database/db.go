@@ -24,6 +24,7 @@ func InitializeDB() {
 	Client, err = mongo.Connect(ctx, options.Client().ApplyURI(os.Getenv("MONGO_URL")))
 
 	if err != nil {
+		log.Println("DB connection err: ", err)
 		panic(err)
 	}
 
@@ -34,6 +35,7 @@ func InitializeDB() {
 	// }()
 
 	if err := Client.Ping(ctx, readpref.Primary()); err != nil {
+		log.Println("DB ping error: ", err)
 		panic(err)
 	}
 
