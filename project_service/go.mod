@@ -1,5 +1,6 @@
 module github.com/Dev-Qwerty/zod-backend/project_service
 
+// +heroku goVersion go1.15
 go 1.15
 
 require (
