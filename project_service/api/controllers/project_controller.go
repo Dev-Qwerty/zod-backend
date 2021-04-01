@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"firebase.google.com/go/v4/auth"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/models"
@@ -48,8 +49,7 @@ func CreateProjectHandler(w http.ResponseWriter, r *http.Request) {
 		(*project.PendingInvites)[i].InvitedBy = userDetails.DisplayName
 		(*project.PendingInvites)[i].Name, err = utils.GetUserDetailsByEmail((*project.PendingInvites)[i].Email)
 		if err != nil {
-			responses.ERROR(w, http.StatusUnprocessableEntity, err)
-			return
+			(*project.PendingInvites)[i].Name = (*project.PendingInvites)[i].Email[:strings.IndexByte((*project.PendingInvites)[i].Email, '@')]
 		}
 	}
 
@@ -96,8 +96,7 @@ func AddProjectMembersHandler(w http.ResponseWriter, r *http.Request) {
 		(*project.PendingInvites)[i].InvitedBy = userDetails.DisplayName
 		(*project.PendingInvites)[i].Name, err = utils.GetUserDetailsByEmail((*project.PendingInvites)[i].Email)
 		if err != nil {
-			responses.ERROR(w, http.StatusUnprocessableEntity, err)
-			return
+			(*project.PendingInvites)[i].Name = (*project.PendingInvites)[i].Email[:strings.IndexByte((*project.PendingInvites)[i].Email, '@')]
 		}
 	}
 
