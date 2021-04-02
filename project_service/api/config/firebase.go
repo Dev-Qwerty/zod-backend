@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"strings"
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"
@@ -23,10 +24,14 @@ func InitializeFirebase() error {
 		Client_Email string `json:"client_email"`
 	}
 
+	private_key := os.Getenv("PRIVATE_KEY")
+	r := strings.NewReplacer("\\\n", "\\n")
+	private_key_replaced := r.Replace(os.Getenv(private_key))
+
 	firebase_param := param{
 		Type:         os.Getenv("TYPE"),
 		Project_ID:   os.Getenv("PROJECT_ID"),
-		Private_Key:  os.Getenv("PRIVATE_KEY"),
+		Private_Key:  private_key_replaced,
 		Client_Email: os.Getenv("CLIENT_EMAIL"),
 	}
 
