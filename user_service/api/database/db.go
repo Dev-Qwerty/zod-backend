@@ -22,12 +22,19 @@ func Connect() error {
 		return err
 	}
 
-	DB = pg.Connect(&pg.Options{
-		Addr:     os.Getenv("DB_ADDR"),
-		User:     os.Getenv("DB_USER"),
-		Password: os.Getenv("DB_PASSWORD"),
-		Database: os.Getenv("DB_NAME"),
-	})
+	// DB = pg.Connect(&pg.Options{
+	// 	Addr:     os.Getenv("DB_ADDR_HEROKU"),
+	// 	User:     os.Getenv("DB_USER_HEROKU"),
+	// 	Password: os.Getenv("DB_PASS_HEROKU"),
+	// 	Database: os.Getenv("DB_NAME_HEROKU"),
+	// })
+
+	opt, err := pg.ParseURL(os.Getenv("DB_URI_HEROKU"))
+	if err != nil {
+		return err
+	}
+
+	DB = pg.Connect(opt)
 
 	// Check if database is up and running
 	if err := DB.Ping(context.Background()); err != nil {
