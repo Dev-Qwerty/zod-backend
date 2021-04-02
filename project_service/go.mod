@@ -1,5 +1,6 @@
 module github.com/Dev-Qwerty/zod-backend/project_service
 
+// +heroku goVersion go1.15
 go 1.15
 
 require (
@@ -7,6 +8,7 @@ require (
 	cloud.google.com/go/storage v1.12.0 // indirect
 	firebase.google.com/go/v4 v4.1.0
 	github.com/gorilla/mux v1.8.0
+	github.com/joho/godotenv v1.3.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/segmentio/ksuid v1.0.3
 	go.mongodb.org/mongo-driver v1.4.4

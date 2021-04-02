@@ -3,6 +3,7 @@ package api
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/config"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/database"
@@ -16,12 +17,20 @@ func Run() {
 
 	routes.InitializeRoutes(router)
 
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Printf("failed to load environment variables: %v", err)
+	// }
+
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println("DB connection failed: ", r)
 		}
 		log.Println("server starting on port 8080")
-		err := http.ListenAndServe(":8080", router)
+
+		port := ":" + os.Getenv("PORT")
+
+		err := http.ListenAndServe(port, router)
 		if err != nil {
 			log.Fatalf("Server failed to start with err: %v", err)
 		}
