@@ -3,7 +3,9 @@ package config
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
+	"strings"
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"
@@ -27,15 +29,17 @@ func InitializeFirebase() error {
 		Auth_Provider_x509_Cert_Url string `json:"auth_provider_x509_cert_url"`
 		Client_x509_Cert_Url        string `json:"client_x509_cert_url"`
 	}
-	// privateKey := os.Getenv("FIREBASE_PRIVATE_KEY")
-	// r := strings.NewReplacer("\\\n", "\\n")
-	// newPrivateKey := r.Replace(os.Getenv(privateKey))
+	privateKey := os.Getenv("FIREBASE_PRIVATE_KEY")
+	fmt.Println(privateKey)
+	r := strings.NewReplacer("\\n", "\n")
+	newPrivateKey := r.Replace(privateKey)
+	fmt.Println(newPrivateKey)
 
 	firebaseParam := param{
 		Type:                        os.Getenv("FIREBASE_TYPE"),
 		Project_ID:                  os.Getenv("FIREBASE_PROJECT_ID"),
 		Private_Key_Id:              os.Getenv("FIREBASE_PRIVATE_KEY_ID"),
-		Private_Key:                 os.Getenv("FIREBASE_PRIVATE_KEY_TEST"),
+		Private_Key:                 newPrivateKey,
 		Client_Email:                os.Getenv("FIREBASE_CLIENT_EMAIL"),
 		Client_Id:                   os.Getenv("FIREBASE_CLIENT_ID"),
 		Auth_Uri:                    os.Getenv("FIREBASE_AUTH_URI"),
