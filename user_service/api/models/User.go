@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"errors"
+	"log"
 	"time"
 
 	"firebase.google.com/go/v4/auth"
@@ -56,6 +57,7 @@ func CreateNewUser(user FirebaseUser) error {
 
 	u, err := config.Client.CreateUser(context.Background(), params)
 	if err != nil {
+		log.Printf("Error at CreateNewUser User.go : %v", err)
 		return err
 	}
 
@@ -71,11 +73,13 @@ func CreateNewUser(user FirebaseUser) error {
 	_, err = database.DB.Model(newuser).Insert()
 	if err != nil {
 		config.Client.DeleteUser(context.Background(), u.UID)
+		log.Printf("Error at CreateNewUser User.go : %v", err)
 		return err
 	}
 
 	err = utilities.SendEmailVerificationLink(user.Email)
 	if err != nil {
+		log.Printf("Error at CreateNewUser User.go : %v", err)
 		return err
 	}
 
@@ -92,18 +96,21 @@ func UpdateUser(data UpdatedUser) error {
 		user.Email = data.Value
 		_, err := database.DB.Model(user).Set("email = ?email").Where("id = ?id").Update()
 		if err != nil {
+			log.Printf("Error at UpdatUser User.go : %v", err)
 			return err
 		}
 	case "fname":
 		user.Fname = data.Value
 		_, err := database.DB.Model(user).Set("fname = ?fname").Where("id = ?id").Update()
 		if err != nil {
+			log.Printf("Error at UpdatUser User.go : %v", err)
 			return err
 		}
 	case "lname":
 		user.Lname = data.Value
 		_, err := database.DB.Model(user).Set("lname = ?lname").Where("id = ?id").Update()
 		if err != nil {
+			log.Printf("Error at UpdatUser User.go : %v", err)
 			return err
 		}
 	default:
@@ -118,17 +125,20 @@ func DeleteUser(id string) error {
 	user.ID = id
 	err := database.DB.Model(user).Where("id = ?id").Select()
 	if err != nil {
+		log.Printf("Error at DeleteUser User.go : %v", err)
 		return err
 	}
 	if len(user.Role) == 0 {
 		err := config.Client.DeleteUser(context.Background(), id)
 
 		if err != nil {
+			log.Printf("Error at DeleteUser User.go : %v", err)
 			return err
 		}
 		_, err = database.DB.Model(user).Where("id = ?id").Delete()
 
 		if err != nil {
+			log.Printf("Error at DeleteUser User.go : %v", err)
 			return err
 		}
 	} else {
@@ -145,6 +155,7 @@ func AddProject(project Project) error {
 		_, err = database.DB.Exec(`UPDATE users SET owner = array_append(owner, '` + project.ProjectId + `') WHERE id = '` + project.ID + `';`)
 	}
 	if err != nil {
+		log.Printf("Error at AddProject User.go : %v", err)
 		return err
 	}
 
@@ -157,12 +168,14 @@ func UpdateProject(project Project) error {
 		_, err := database.DB.Exec(`UPDATE users SET owner = array_append(owner, '` + project.ProjectId + `') WHERE id = '` + project.ID + `';`)
 
 		if err != nil {
+			log.Printf("Error at UpdateProject User.go : %v", err)
 			return err
 		}
 	} else {
 		_, err := database.DB.Exec(`UPDATE users SET owner = array_remove(owner, '` + project.ProjectId + `') WHERE id = '` + project.ID + `';`)
 
 		if err != nil {
+			log.Printf("Error at UpdateProject User.go : %v", err)
 			return err
 		}
 	}
@@ -175,6 +188,7 @@ func DeleteProject(project Project) error {
 
 	result, err := database.DB.Exec(`SELECT * FROM users WHERE id = '` + project.ID + `' AND '` + project.ProjectId + `' = ANY(owner);`)
 	if err != nil {
+		log.Printf("Error at DeleteProject User.go : %v", err)
 		return err
 	}
 
@@ -182,6 +196,7 @@ func DeleteProject(project Project) error {
 		_, err = database.DB.Exec(`UPDATE users SET owner = array_remove(owner, '` + project.ProjectId + `') WHERE id = '` + project.ID + `';`)
 
 		if err != nil {
+			log.Printf("Error at DeleteProject User.go : %v", err)
 			return err
 		}
 	}
@@ -189,6 +204,7 @@ func DeleteProject(project Project) error {
 	_, err = database.DB.Exec(`UPDATE users SET projects = array_remove(projects, '` + project.ProjectId + `') WHERE id = '` + project.ID + `';`)
 
 	if err != nil {
+		log.Printf("Error at DeleteProject User.go : %v", err)
 		return err
 	}
 
