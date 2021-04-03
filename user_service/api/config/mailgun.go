@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"log"
 	"os"
 	"time"
 
@@ -28,6 +29,7 @@ func SendMail(link string, email string) error {
 	_, _, err := mg.Send(ctx, message)
 
 	if err != nil {
+		log.Printf("Error at SendMail mailgun.go : %v", err)
 		return err
 	}
 

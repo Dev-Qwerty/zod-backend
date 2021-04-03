@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"os"
 	"strings"
 
@@ -48,17 +49,20 @@ func InitializeFirebase() error {
 
 	firebaseCred, err := json.Marshal(firebaseParam)
 	if err != nil {
+		log.Printf("Error at InitializeFirebase firebase.go : %v", err)
 		return err
 	}
 
 	sa := option.WithCredentialsJSON([]byte(firebaseCred))
 	app, err := firebase.NewApp(context.Background(), nil, sa)
 	if err != nil {
+		log.Printf("Error at InitializeFirebase firebase.go : %v", err)
 		return err
 	}
 
 	Client, err = app.Auth(context.Background())
 	if err != nil {
+		log.Printf("Error at InitializeFirebase firebase.go : %v", err)
 		return err
 	}
 

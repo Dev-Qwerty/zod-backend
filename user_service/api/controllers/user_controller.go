@@ -13,8 +13,6 @@ import (
 func SignUp(w http.ResponseWriter, r *http.Request) {
 	user := models.FirebaseUser{}
 
-	user.Email = "email"
-
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		log.Printf("Error decoding user: %v", err)

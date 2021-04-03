@@ -16,6 +16,7 @@ func Connect() error {
 
 	opt, err := pg.ParseURL(os.Getenv("DB_URI_HEROKU"))
 	if err != nil {
+		log.Printf("Error at Connect db.go : %v", err)
 		return err
 	}
 
@@ -23,6 +24,7 @@ func Connect() error {
 
 	// Check if database is up and running
 	if err := DB.Ping(context.Background()); err != nil {
+		log.Printf("Error at Connect db.go : %v", err)
 		return err
 	}
 	log.Println("Connected to db")
