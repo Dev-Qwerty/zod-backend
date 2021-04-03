@@ -37,7 +37,7 @@ func Run() {
 		log.Printf("Failed to connect to db: %v", err)
 	}
 
-	port := os.Getenv("PORT")
+	port := ":" + os.Getenv("PORT")
 
 	log.Println("Server starting on port " + port + " 🚀")
 	err = http.ListenAndServe(port, router)
