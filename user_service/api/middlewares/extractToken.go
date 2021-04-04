@@ -16,6 +16,7 @@ func ExtractToken(next http.Handler) http.Handler {
 		u, err := config.Client.VerifyIDToken(context.TODO(), token)
 		if err != nil {
 			log.Printf("Error at ExtractToken extractToken.go : %v", err)
+			w.WriteHeader(http.StatusUnauthorized)
 		} else {
 			ctx := r.Context()
 			ctx = context.WithValue(ctx, "uid", u.UID)
