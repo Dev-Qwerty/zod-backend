@@ -2,10 +2,12 @@ package middlewares
 
 import (
 	"context"
-	"fmt"
+	"errors"
+	"log"
 	"net/http"
 
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/config"
+	"github.com/Dev-Qwerty/zod-backend/project_service/api/responses"
 )
 
 // type key string
@@ -18,7 +20,9 @@ func ExtractUID(next http.Handler) http.Handler {
 		idToken := r.Header.Get("token")
 		token, err := config.Client.VerifyIDToken(context.TODO(), idToken)
 		if err != nil {
-			fmt.Println(err)
+			log.Println("ExtractUID: ", err)
+			responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+			return
 		}
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, "tokenuid", token)
