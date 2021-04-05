@@ -19,4 +19,8 @@ func InitializeRoutes(r *mux.Router) {
 	etm.Use(middlewares.ExtractToken)
 	etm.HandleFunc("/update", controllers.Update).Methods("PUT")
 	etm.HandleFunc("/delete", controllers.Delete).Methods("DELETE")
+
+	r.Use(mux.CORSMethodMiddleware(userRouter))
+	r.Use(mux.CORSMethodMiddleware(projectRouter))
+	r.Use(mux.CORSMethodMiddleware(etm))
 }
