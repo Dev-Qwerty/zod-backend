@@ -11,6 +11,8 @@ import (
 
 // SignUp creates new user
 func SignUp(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	user := models.FirebaseUser{}
 
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -30,6 +32,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 // Update updates the user data
 func Update(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	data := models.UpdatedUser{}
 	data.ID = r.Context().Value("uid").(string)
@@ -51,6 +54,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 // Delete removes the user
 func Delete(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	uid := r.Context().Value("uid").(string)
 
 	err := models.DeleteUser(uid)
@@ -64,6 +68,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 
 // Add projects of user to db
 func NewProject(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	project := models.Project{}
 
 	err := json.NewDecoder(r.Body).Decode(&project)
@@ -83,6 +88,7 @@ func NewProject(w http.ResponseWriter, r *http.Request) {
 
 // Update project role of users
 func UpdateProject(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	project := models.Project{}
 
 	err := json.NewDecoder(r.Body).Decode(&project)
@@ -102,6 +108,7 @@ func UpdateProject(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteProject(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	project := models.Project{}
 
 	err := json.NewDecoder(r.Body).Decode(&project)
