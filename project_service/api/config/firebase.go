@@ -3,7 +3,7 @@ package config
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -30,10 +30,8 @@ func InitializeFirebase() error {
 		Client_x509_Cert_Url        string `json:"client_x509_cert_url"`
 	}
 	privateKey := os.Getenv("FIREBASE_PRIVATE_KEY")
-	fmt.Println(privateKey)
 	r := strings.NewReplacer("\\n", "\n")
 	newPrivateKey := r.Replace(privateKey)
-	fmt.Println(newPrivateKey)
 
 	firebaseParam := param{
 		Type:                        os.Getenv("FIREBASE_TYPE"),
@@ -50,17 +48,20 @@ func InitializeFirebase() error {
 
 	firebaseCred, err := json.Marshal(firebaseParam)
 	if err != nil {
+		log.Println("InitializeFirebase: ", err)
 		return err
 	}
 
 	sa := option.WithCredentialsJSON([]byte(firebaseCred))
 	app, err := firebase.NewApp(context.Background(), nil, sa)
 	if err != nil {
+		log.Println("InitializeFirebase: ", err)
 		return err
 	}
 
 	Client, err = app.Auth(context.Background())
 	if err != nil {
+		log.Println("InitializeFirebase: ", err)
 		return err
 	}
 
