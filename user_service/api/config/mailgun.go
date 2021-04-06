@@ -2,18 +2,15 @@ package config
 
 import (
 	"context"
+	"log"
 	"os"
 	"time"
 
-	"github.com/joho/godotenv"
 	"github.com/mailgun/mailgun-go/v4"
 )
 
 func SendMail(link string, email string) error {
-	err := godotenv.Load()
-	if err != nil {
-		return err
-	}
+
 	domain := os.Getenv("MAILGUN_DOMAIN")
 	apiKey := os.Getenv("MAINGUN_APIKEY")
 
@@ -29,9 +26,10 @@ func SendMail(link string, email string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	_, _, err = mg.Send(ctx, message)
+	_, _, err := mg.Send(ctx, message)
 
 	if err != nil {
+		log.Printf("Error at SendMail mailgun.go : %v", err)
 		return err
 	}
 
