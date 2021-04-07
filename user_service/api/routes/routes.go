@@ -8,19 +8,18 @@ import (
 
 // InitializeRoutes init routes
 func InitializeRoutes(r *mux.Router) {
+
+	r.Use(middlewares.CorsHandler)
+
 	userRouter := r.PathPrefix("/api/user").Subrouter()            //User routes
 	projectRouter := r.PathPrefix("/api/user/project").Subrouter() //Project routes
 	etm := r.PathPrefix("/api/user").Subrouter()                   //Extract token middleware
 
-	userRouter.HandleFunc("/signup", controllers.SignUp).Methods("POST")
-	projectRouter.HandleFunc("/new", controllers.NewProject).Methods("POST")
-	projectRouter.HandleFunc("/update", controllers.UpdateProject).Methods("PUT")
-	projectRouter.HandleFunc("/delete", controllers.DeleteProject).Methods("DELETE")
+	userRouter.HandleFunc("/signup", controllers.SignUp).Methods("POST", "OPTIONS")
+	projectRouter.HandleFunc("/new", controllers.NewProject).Methods("POST", "OPTIONS")
+	projectRouter.HandleFunc("/update", controllers.UpdateProject).Methods("PUT", "OPTIONS")
+	projectRouter.HandleFunc("/delete", controllers.DeleteProject).Methods("DELETE", "OPTIONS")
 	etm.Use(middlewares.ExtractToken)
-	etm.HandleFunc("/update", controllers.Update).Methods("PUT")
-	etm.HandleFunc("/delete", controllers.Delete).Methods("DELETE")
-
-	r.Use(mux.CORSMethodMiddleware(userRouter))
-	r.Use(mux.CORSMethodMiddleware(projectRouter))
-	r.Use(mux.CORSMethodMiddleware(etm))
+	etm.HandleFunc("/update", controllers.Update).Methods("PUT", "OPTIONS")
+	etm.HandleFunc("/delete", controllers.Delete).Methods("DELETE", "OPTIONS")
 }
