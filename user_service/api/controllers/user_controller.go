@@ -71,6 +71,25 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func ResendEmail(w http.ResponseWriter, r *http.Request) {
+	var email map[string]string
+
+	err := json.NewDecoder(r.Body).Decode(&email)
+
+	if err != nil {
+		fmt.Printf("Failed to send email : %v", err)
+		http.Error(w, "Failed to send email", http.StatusInternalServerError)
+	} else {
+		err = utils.SendEmailVerificationLink(email["email"])
+		if err != nil {
+			log.Printf("Error at ResendEmail user_controller.go : %v", err)
+			http.Error(w, "Failed to send email", http.StatusInternalServerError)
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
 // Add projects of user to db
 func NewProject(w http.ResponseWriter, r *http.Request) {
 

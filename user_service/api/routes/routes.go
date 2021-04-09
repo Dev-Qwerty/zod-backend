@@ -16,6 +16,7 @@ func InitializeRoutes(r *mux.Router) {
 	etm := r.PathPrefix("/api/user").Subrouter()                   //Extract token middleware
 
 	userRouter.HandleFunc("/signup", controllers.SignUp).Methods("POST", "OPTIONS")
+	userRouter.HandleFunc("/resendverificationemail", controllers.ResendEmail).Methods("POST", "OPTIONS")
 	projectRouter.HandleFunc("/new", controllers.NewProject).Methods("POST", "OPTIONS")
 	projectRouter.HandleFunc("/update", controllers.UpdateProject).Methods("PUT", "OPTIONS")
 	projectRouter.HandleFunc("/delete", controllers.DeleteProject).Methods("DELETE", "OPTIONS")
