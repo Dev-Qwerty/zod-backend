@@ -84,3 +84,24 @@ func ResendEmail(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}
 }
+
+// ResetPassword send a link to reset the password
+func ResetPassword(w http.ResponseWriter, r *http.Request) {
+	var email map[string]string
+
+	err := json.NewDecoder(r.Body).Decode(&email)
+
+	if err != nil {
+		fmt.Printf("Failed to send email: %v", err)
+		http.Error(w, "Failed to send email", http.StatusInternalServerError)
+	} else {
+		err = utils.SendPasswordResetLink(email["email"])
+
+		if err != nil {
+			log.Printf("Error at ResendEmail user_controller.go : %v", err)
+			http.Error(w, "Failed to send email", http.StatusInternalServerError)
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
+}

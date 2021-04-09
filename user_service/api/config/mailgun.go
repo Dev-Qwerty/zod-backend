@@ -9,7 +9,7 @@ import (
 	"github.com/mailgun/mailgun-go/v4"
 )
 
-func SendMail(link string, email string) error {
+func SendMail(link string, email string, subjectline string) error {
 
 	domain := os.Getenv("MAILGUN_DOMAIN")
 	apiKey := os.Getenv("MAINGUN_APIKEY")
@@ -17,7 +17,7 @@ func SendMail(link string, email string) error {
 	mg := mailgun.NewMailgun(domain, apiKey)
 
 	sender := os.Getenv("MAILGUN_SENDER")
-	subject := "Verify your zode account"
+	subject := subjectline
 	body := link
 	recipient := email
 
