@@ -66,7 +66,7 @@ func CreateProjectHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	responses.JSON(w, http.StatusOK, projectID)
+	responses.JSON(w, http.StatusCreated, projectID)
 
 }
 
