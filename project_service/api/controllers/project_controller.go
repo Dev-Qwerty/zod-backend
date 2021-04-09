@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
+	"log"
 	"net/http"
 	"strings"
 
@@ -21,6 +23,7 @@ func CreateProjectHandler(w http.ResponseWriter, r *http.Request) {
 	userDetails, err := utils.GetUserDetails(tokenStruct.UID)
 
 	if err != nil {
+		log.Println("CreateProjectHandler: <Error while fetching user details> ", err)
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
@@ -28,6 +31,7 @@ func CreateProjectHandler(w http.ResponseWriter, r *http.Request) {
 	project := &models.Project{}
 	err = json.NewDecoder(r.Body).Decode(&project)
 	if err != nil {
+		log.Println("CreateProjectHandler: <Error while decoding request Body> ", err)
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
@@ -49,18 +53,20 @@ func CreateProjectHandler(w http.ResponseWriter, r *http.Request) {
 		(*project.PendingInvites)[i].InvitedBy = userDetails.DisplayName
 		(*project.PendingInvites)[i].Name, err = utils.GetUserDetailsByEmail((*project.PendingInvites)[i].Email)
 		if err != nil {
+			log.Println("CreateProjectHandler: <Error while fetching user's name(Pending Invites)> ", err)
 			(*project.PendingInvites)[i].Name = (*project.PendingInvites)[i].Email[:strings.IndexByte((*project.PendingInvites)[i].Email, '@')]
 		}
 	}
 
 	projectID, err := project.CreateProject()
 	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		log.Println("CreateProjectHandler: ", err)
+		responses.ERROR(w, http.StatusUnprocessableEntity, errors.New("failed to create project"))
 		return
 
 	}
 
-	responses.JSON(w, http.StatusOK, projectID)
+	responses.JSON(w, http.StatusCreated, projectID)
 
 }
 
@@ -73,7 +79,8 @@ func GetProjectsHandler(w http.ResponseWriter, r *http.Request) {
 
 	projects, err := project.GetProjects(tokenStruct.Claims["email"].(string))
 	if err != nil {
-		responses.ERROR(w, http.StatusBadRequest, err)
+		log.Println("GetProjectsHandler: ", err)
+		responses.ERROR(w, http.StatusBadRequest, errors.New("failed to fetch projects"))
 	}
 	responses.JSON(w, http.StatusOK, projects)
 }
@@ -88,6 +95,7 @@ func AddProjectMembersHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&project)
 	if err != nil {
+		log.Println("AddProjectMembersHandler: <Error while decoding request body> ", err)
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
@@ -96,13 +104,15 @@ func AddProjectMembersHandler(w http.ResponseWriter, r *http.Request) {
 		(*project.PendingInvites)[i].InvitedBy = userDetails.DisplayName
 		(*project.PendingInvites)[i].Name, err = utils.GetUserDetailsByEmail((*project.PendingInvites)[i].Email)
 		if err != nil {
+			log.Println("AddProjectMembersHandler: <Error while fetching user's name(pending Invites) ", err)
 			(*project.PendingInvites)[i].Name = (*project.PendingInvites)[i].Email[:strings.IndexByte((*project.PendingInvites)[i].Email, '@')]
 		}
 	}
 
 	err = project.AddProjectMembers(tokenStruct.Claims["email"].(string))
 	if err != nil {
-		responses.ERROR(w, http.StatusUnauthorized, err)
+		log.Println("AddProjectMembersHandler: ", err)
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("failed to add new member"))
 		return
 	}
 	responses.JSON(w, http.StatusOK, nil)
@@ -118,13 +128,15 @@ func AcceptInviteHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&project)
 	if err != nil {
+		log.Println("AcceptInviteHandler: <Error while decoding request body> ", err)
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
 	err = project.AcceptInvite(userDetails)
 	if err != nil {
-		responses.ERROR(w, http.StatusBadRequest, err)
+		log.Println("AcceptInviteHandler: ", err)
+		responses.ERROR(w, http.StatusBadRequest, errors.New("failed to accept invitation"))
 		return
 	}
 	responses.JSON(w, http.StatusOK, nil)
@@ -139,11 +151,13 @@ func RejectInviteHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&project)
 	if err != nil {
+		log.Println("RejectInviteHandler: <failed to decode request body> ", err)
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 	err = project.RejectInvite(userDetals)
 	if err != nil {
+		log.Println("RejectInviteHandler: ", err)
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
@@ -159,11 +173,13 @@ func LeaveProjectHandler(w http.ResponseWriter, r *http.Request) {
 	project := &models.Project{}
 	err := json.NewDecoder(r.Body).Decode(&project)
 	if err != nil {
+		log.Println("LeaveProjectHandler: <failed to decode request body> ", err)
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 	err = project.LeaveProject(tokenStruct.Claims["email"].(string))
 	if err != nil {
+		log.Println("LeaveProjectHandler: ", err)
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
@@ -182,11 +198,13 @@ func RemoveProjectMemberHandler(w http.ResponseWriter, r *http.Request) {
 	var detail *Details
 	err := json.NewDecoder(r.Body).Decode(&detail)
 	if err != nil {
+		log.Println("RemoveProjectMemberHandler: <failed to decode request body> ", err)
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 	err = models.RemoveProjectMember(tokenStruct.Claims["email"].(string), detail.MemberID, detail.ProjectID)
 	if err != nil {
+		log.Println("RemoveProjectMemberHandler: ", err)
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
@@ -201,6 +219,7 @@ func GetPendingInvitesHandler(w http.ResponseWriter, r *http.Request) {
 	invites, err := models.GetPendingInvites(tokenStruct.Claims["email"].(string))
 
 	if err != nil {
+		log.Println("GetPendingInvitesHandler: ", err)
 		responses.ERROR(w, http.StatusBadRequest, err)
 	}
 	responses.JSON(w, http.StatusOK, invites)
@@ -210,6 +229,7 @@ func GetTeamMembers(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	members, err := models.TeamMembers(vars["projectID"])
 	if err != nil {
+		log.Println("GetTeamMembersHandler: ", err)
 		responses.ERROR(w, http.StatusBadRequest, err)
 	}
 	responses.JSON(w, http.StatusOK, members)
@@ -222,11 +242,13 @@ func ChangeMemberRoleHandler(w http.ResponseWriter, r *http.Request) {
 	var requestBody map[string]string
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
 	if err != nil {
+		log.Println("ChangeMemberRoleHandler: <failed to decode request body> ", err)
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 	}
 
 	err = models.ChangeMemberRole(requestBody, tokenStruct.Claims["email"].(string))
 	if err != nil {
+		log.Println("ChangeMemberRoleHandler: ", err)
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 	} else {
 		responses.JSON(w, http.StatusOK, "Updated user role")

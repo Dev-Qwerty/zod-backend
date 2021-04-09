@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"errors"
+	"log"
 
 	"firebase.google.com/go/v4/auth"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/database"
@@ -47,6 +48,7 @@ func (p *Project) CreateProject() (string, error) {
 	p.ProjectID = ksuid.New().String()
 	createdProjectID, err := zodeProjectCollection.InsertOne(context.TODO(), p)
 	if err != nil {
+		log.Println("CreateProject: ", err)
 		return "", err
 	}
 	id := createdProjectID.InsertedID.(string)
@@ -69,12 +71,14 @@ func (p *Project) GetProjects(userEmail string) ([]*Project, error) {
 	cursor, err := zodeProjectCollection.Find(context.TODO(), filter, options.Find().SetProjection(projection))
 
 	if err != nil {
+		log.Println("GetProjects: ", err)
 		return []*Project{}, err
 	}
 	for cursor.Next(context.TODO()) {
 		var project Project
 		err := cursor.Decode(&project)
 		if err != nil {
+			log.Println("GetProjects: ", err)
 			return []*Project{}, err
 		}
 		projects = append(projects, &project)
@@ -83,6 +87,7 @@ func (p *Project) GetProjects(userEmail string) ([]*Project, error) {
 	cursor.Close(context.TODO())
 
 	if err := cursor.Err(); err != nil {
+		log.Println("GetProjects: ", err)
 		return []*Project{}, err
 	}
 
@@ -105,12 +110,14 @@ func (p *Project) AddProjectMembers(email string) error {
 	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
 	err := zodeProjectCollection.FindOne(context.TODO(), filter).Decode(&project)
 	if err != nil {
+		log.Println("AddProjectMembers: ", err)
 		return err
 	}
 	filter = bson.M{"_id": p.ProjectID}
 	update := bson.M{"$push": bson.M{"pendingInvites": bson.M{"$each": p.PendingInvites}}}
 	_, err = zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
+		log.Println("AddProjectMembers: ", err)
 		return err
 	}
 
@@ -131,6 +138,7 @@ func (p *Project) AcceptInvite(userDetails *auth.UserInfo) error {
 	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
 	err := zodeProjectCollection.FindOne(context.TODO(), filter, options.FindOne().SetProjection(projection)).Decode(&project)
 	if err != nil {
+		log.Println("AcceptInvite: ", err)
 		return err
 	}
 	pendinginvite := &[]PendingInvite{}
@@ -149,6 +157,7 @@ func (p *Project) AcceptInvite(userDetails *auth.UserInfo) error {
 	update := bson.M{"$push": bson.M{"projectMembers": member}}
 	_, err = zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
+		log.Println("AcceptInvite: ", err)
 		return err
 	}
 
@@ -160,6 +169,7 @@ func (p *Project) AcceptInvite(userDetails *auth.UserInfo) error {
 		}}
 	_, err = zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
+		log.Println("AcceptInvite: ", err)
 		return err
 	}
 
@@ -177,6 +187,7 @@ func (p *Project) RejectInvite(userDetails *auth.UserInfo) error {
 	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
 	_, err := zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
+		log.Println("RejectInvite: ", err)
 		return err
 	}
 
@@ -202,12 +213,14 @@ func (p *Project) LeaveProject(email string) error {
 	//count total no of members in the project
 	cursor, err := zodeProjectCollection.Aggregate(context.TODO(), mongo.Pipeline{matchStage, memberCount})
 	if err != nil {
+		log.Println("LeaveProject: ", err)
 		return err
 	}
 
 	var result bson.M
 	for cursor.Next(context.TODO()) {
 		if err := cursor.Decode(&result); err != nil {
+			log.Println("LeaveProject: ", err)
 			return err
 		}
 	}
@@ -217,6 +230,7 @@ func (p *Project) LeaveProject(email string) error {
 		// todo: delete chat and boards in the project
 		_, err = zodeProjectCollection.DeleteOne(context.TODO(), bson.M{"_id": p.ProjectID})
 		if err != nil {
+			log.Println("LeaveProject: ", err)
 			return err
 		}
 		return nil
@@ -235,6 +249,7 @@ func (p *Project) LeaveProject(email string) error {
 	}
 	_, err = zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
+		log.Println("LeaveProject: ", err)
 		return err
 	}
 	return nil
@@ -260,6 +275,7 @@ func RemoveProjectMember(email, memberID string, projectID string) error {
 		}}
 	result, err := zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
+		log.Println("RemoveProjectMember: ", err)
 		return err
 	}
 	if result.MatchedCount == 0 {
@@ -287,6 +303,7 @@ func GetPendingInvites(email string) ([]map[string]interface{}, error) {
 	cursor, err := zodeProjectCollection.Find(context.TODO(), filter, options.Find().SetProjection(projection))
 
 	if err != nil {
+		log.Println("GetPendingInvites: ", err)
 		return invites, err
 	}
 	var invite map[string]interface{}
@@ -294,6 +311,7 @@ func GetPendingInvites(email string) ([]map[string]interface{}, error) {
 
 		err := cursor.Decode(&invite)
 		if err != nil {
+			log.Println("GetPendingInvites: ", err)
 			return invites, err
 		}
 		invites = append(invites, invite)
@@ -302,6 +320,7 @@ func GetPendingInvites(email string) ([]map[string]interface{}, error) {
 	cursor.Close(context.TODO())
 
 	if err := cursor.Err(); err != nil {
+		log.Println("GetPendingInvites: ", err)
 		return invites, err
 	}
 
@@ -323,6 +342,7 @@ func TeamMembers(projectid string) (map[string]interface{}, error) {
 	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
 	cursor, err := zodeProjectCollection.Find(context.TODO(), filter, options.Find().SetProjection(projection))
 	if err != nil {
+		log.Println("TeamMembers: ", err)
 		return member, err
 	}
 
@@ -330,6 +350,7 @@ func TeamMembers(projectid string) (map[string]interface{}, error) {
 
 		err := cursor.Decode(&member)
 		if err != nil {
+			log.Println("TeamMembers: ", err)
 			return member, err
 		}
 	}
@@ -337,6 +358,7 @@ func TeamMembers(projectid string) (map[string]interface{}, error) {
 	cursor.Close(context.TODO())
 
 	if err := cursor.Err(); err != nil {
+		log.Println("TeamMembers: ", err)
 		return member, err
 	}
 
@@ -358,6 +380,7 @@ func ChangeMemberRole(requestBody map[string]string, email string) error {
 	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
 	err := zodeProjectCollection.FindOne(context.TODO(), filter).Decode(&project)
 	if err != nil {
+		log.Println("ChangeMemberRole: ", err)
 		return err
 	}
 
@@ -378,6 +401,7 @@ func ChangeMemberRole(requestBody map[string]string, email string) error {
 
 	updatedDetails, err := zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
+		log.Println("ChangeMemberRole: ", err)
 		return err
 	}
 
