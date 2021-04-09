@@ -11,7 +11,6 @@ import (
 // ExtractToken extracts the use from the idToken
 func ExtractToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
 		token := r.Header.Get("token")
 
 		u, err := config.Client.VerifyIDToken(context.TODO(), token)

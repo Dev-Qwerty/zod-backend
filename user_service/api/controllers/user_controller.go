@@ -13,8 +13,6 @@ import (
 // SignUp creates new user
 func SignUp(w http.ResponseWriter, r *http.Request) {
 
-	utils.SetCors(w, r)
-
 	user := models.FirebaseUser{}
 
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -34,8 +32,6 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 // Update updates the user data
 func Update(w http.ResponseWriter, r *http.Request) {
-
-	utils.SetCors(w, r)
 
 	data := models.UpdatedUser{}
 	data.ID = r.Context().Value("uid").(string)
@@ -58,8 +54,6 @@ func Update(w http.ResponseWriter, r *http.Request) {
 // Delete removes the user
 func Delete(w http.ResponseWriter, r *http.Request) {
 
-	utils.SetCors(w, r)
-
 	uid := r.Context().Value("uid").(string)
 
 	err := models.DeleteUser(uid)
@@ -71,70 +65,22 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Add projects of user to db
-func NewProject(w http.ResponseWriter, r *http.Request) {
+// ResendEmail sends the verification email
+func ResendEmail(w http.ResponseWriter, r *http.Request) {
+	var email map[string]string
 
-	utils.SetCors(w, r)
-
-	project := models.Project{}
-
-	err := json.NewDecoder(r.Body).Decode(&project)
-	if err != nil {
-		log.Printf("Failed decoding project: %v", err)
-		http.Error(w, "Failed to save project", http.StatusBadRequest)
-	} else {
-		err = models.AddProject(project)
-		if err != nil {
-			fmt.Printf("Failed to save project: %v", err)
-			http.Error(w, "Failed to save project", http.StatusInternalServerError)
-		} else {
-			w.WriteHeader(http.StatusOK)
-		}
-	}
-}
-
-// Update project role of users
-func UpdateProject(w http.ResponseWriter, r *http.Request) {
-
-	utils.SetCors(w, r)
-
-	project := models.Project{}
-
-	err := json.NewDecoder(r.Body).Decode(&project)
-	if err != nil {
-		log.Printf("Failed decoding project: %v", err)
-		http.Error(w, "Failed to update project", http.StatusBadRequest)
-	} else {
-		err = models.UpdateProject(project)
-
-		if err != nil {
-			fmt.Printf("Failed to update project: %v", err)
-			http.Error(w, "Failed to update project", http.StatusInternalServerError)
-		} else {
-			w.WriteHeader(http.StatusOK)
-		}
-	}
-}
-
-func DeleteProject(w http.ResponseWriter, r *http.Request) {
-
-	utils.SetCors(w, r)
-
-	project := models.Project{}
-
-	err := json.NewDecoder(r.Body).Decode(&project)
+	err := json.NewDecoder(r.Body).Decode(&email)
 
 	if err != nil {
-		log.Printf("Failed decoding project: %v", err)
-		http.Error(w, "Failed to delete project", http.StatusBadRequest)
+		fmt.Printf("Failed to send email : %v", err)
+		http.Error(w, "Failed to send email", http.StatusInternalServerError)
 	} else {
-		err := models.DeleteProject(project)
-
+		err = utils.SendEmailVerificationLink(email["email"])
 		if err != nil {
-			fmt.Printf("Failed to delete project: %v", err)
-			http.Error(w, "Failed to delete project", http.StatusInternalServerError)
-		} else {
-			w.WriteHeader(http.StatusOK)
+			log.Printf("Error at ResendEmail user_controller.go : %v", err)
+			http.Error(w, "Failed to send email", http.StatusInternalServerError)
 		}
+
+		w.WriteHeader(http.StatusOK)
 	}
 }
