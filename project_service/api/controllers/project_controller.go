@@ -124,9 +124,14 @@ func AcceptInviteHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	token := ctx.Value("tokenuid")
 	tokenStruct := token.(*auth.Token)
-	userDetails, _ := utils.GetUserDetails(tokenStruct.UID) // todo : handle error
+	userDetails, err := utils.GetUserDetails(tokenStruct.UID)
+	if err != nil {
+		log.Println("AcceptInviteHandler: <Error while fetching user details> ", err)
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
 
-	err := json.NewDecoder(r.Body).Decode(&project)
+	err = json.NewDecoder(r.Body).Decode(&project)
 	if err != nil {
 		log.Println("AcceptInviteHandler: <Error while decoding request body> ", err)
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
