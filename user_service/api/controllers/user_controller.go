@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/models"
+	"github.com/Dev-Qwerty/zod-backend/user_service/api/responses"
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/utils"
 )
 
@@ -18,14 +19,14 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		log.Printf("Error decoding user: %v", err)
-		http.Error(w, "Failed to create user", http.StatusBadRequest)
+		responses.ERROR(w, http.StatusBadRequest, err)
 	} else {
 		err := models.CreateNewUser(user)
 		if err != nil {
 			log.Printf("Failed to create user: %v", err)
-			http.Error(w, "Failed to create user", http.StatusInternalServerError)
+			responses.ERROR(w, http.StatusInternalServerError, err)
 		} else {
-			w.WriteHeader(http.StatusCreated)
+			responses.JSON(w, http.StatusCreated, nil)
 		}
 	}
 }
@@ -39,14 +40,14 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		log.Printf("Failed decoding user: %v", err)
-		http.Error(w, "Failed to update user", http.StatusBadRequest)
+		responses.ERROR(w, http.StatusBadRequest, err)
 	} else {
 		err := models.UpdateUser(data)
 		if err != nil {
 			fmt.Printf("Failed to update user: %v", err)
-			http.Error(w, "Failed to update user", http.StatusInternalServerError)
+			responses.ERROR(w, http.StatusInternalServerError, err)
 		} else {
-			w.WriteHeader(http.StatusOK)
+			responses.JSON(w, http.StatusOK, nil)
 		}
 	}
 }
@@ -59,9 +60,9 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	err := models.DeleteUser(uid)
 	if err != nil {
 		fmt.Printf("Failed to delete user: %v", err)
-		http.Error(w, "Failed to delete user", http.StatusInternalServerError)
+		responses.ERROR(w, http.StatusInternalServerError, err)
 	} else {
-		w.WriteHeader(http.StatusNoContent)
+		responses.JSON(w, http.StatusNoContent, nil)
 	}
 }
 
@@ -73,15 +74,15 @@ func ResendEmail(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		fmt.Printf("Failed to send email : %v", err)
-		http.Error(w, "Failed to send email", http.StatusInternalServerError)
+		responses.ERROR(w, http.StatusBadRequest, err)
 	} else {
 		err = utils.SendEmailVerificationLink(email["email"])
 		if err != nil {
 			log.Printf("Error at ResendEmail user_controller.go : %v", err)
-			http.Error(w, "Failed to send email", http.StatusInternalServerError)
+			responses.ERROR(w, http.StatusInternalServerError, err)
 		}
 
-		w.WriteHeader(http.StatusOK)
+		responses.JSON(w, http.StatusOK, nil)
 	}
 }
 
@@ -93,15 +94,15 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		fmt.Printf("Failed to send email: %v", err)
-		http.Error(w, "Failed to send email", http.StatusInternalServerError)
+		responses.ERROR(w, http.StatusBadRequest, err)
 	} else {
 		err = utils.SendPasswordResetLink(email["email"])
 
 		if err != nil {
 			log.Printf("Error at ResendEmail user_controller.go : %v", err)
-			http.Error(w, "Failed to send email", http.StatusInternalServerError)
+			responses.ERROR(w, http.StatusInternalServerError, err)
 		}
 
-		w.WriteHeader(http.StatusOK)
+		responses.JSON(w, http.StatusOK, nil)
 	}
 }

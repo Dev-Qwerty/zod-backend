@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/models"
+	"github.com/Dev-Qwerty/zod-backend/user_service/api/responses"
 )
 
 // Add projects of user to db
@@ -17,14 +18,14 @@ func NewProject(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&project)
 	if err != nil {
 		log.Printf("Failed decoding project: %v", err)
-		http.Error(w, "Failed to save project", http.StatusBadRequest)
+		responses.ERROR(w, http.StatusBadRequest, err)
 	} else {
 		err = models.AddProject(project)
 		if err != nil {
 			fmt.Printf("Failed to save project: %v", err)
-			http.Error(w, "Failed to save project", http.StatusInternalServerError)
+			responses.ERROR(w, http.StatusInternalServerError, err)
 		} else {
-			w.WriteHeader(http.StatusOK)
+			responses.JSON(w, http.StatusOK, nil)
 		}
 	}
 }
@@ -37,15 +38,15 @@ func UpdateProject(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&project)
 	if err != nil {
 		log.Printf("Failed decoding project: %v", err)
-		http.Error(w, "Failed to update project", http.StatusBadRequest)
+		responses.ERROR(w, http.StatusBadRequest, err)
 	} else {
 		err = models.UpdateProject(project)
 
 		if err != nil {
 			fmt.Printf("Failed to update project: %v", err)
-			http.Error(w, "Failed to update project", http.StatusInternalServerError)
+			responses.ERROR(w, http.StatusInternalServerError, err)
 		} else {
-			w.WriteHeader(http.StatusOK)
+			responses.JSON(w, http.StatusOK, nil)
 		}
 	}
 }
@@ -59,15 +60,15 @@ func DeleteProject(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Printf("Failed decoding project: %v", err)
-		http.Error(w, "Failed to delete project", http.StatusBadRequest)
+		responses.ERROR(w, http.StatusBadRequest, err)
 	} else {
 		err := models.DeleteProject(project)
 
 		if err != nil {
 			fmt.Printf("Failed to delete project: %v", err)
-			http.Error(w, "Failed to delete project", http.StatusInternalServerError)
+			responses.ERROR(w, http.StatusInternalServerError, err)
 		} else {
-			w.WriteHeader(http.StatusOK)
+			responses.JSON(w, http.StatusNoContent, nil)
 		}
 	}
 }
