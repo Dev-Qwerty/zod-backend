@@ -8,7 +8,7 @@ import (
 
 // InitializeRoutes initializes routes
 func InitializeRoutes(r *mux.Router) {
-	r.Use(middlewares.CorsHandler)
+	r.Use(middlewares.Cors)
 	r.Use(middlewares.ExtractUID)
 	s := r.PathPrefix("/api/projects").Subrouter()
 	s.HandleFunc("/createproject", controllers.CreateProjectHandler).Methods("POST", "OPTIONS")

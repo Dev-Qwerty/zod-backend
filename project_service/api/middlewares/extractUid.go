@@ -15,22 +15,19 @@ import (
 // const tokenUID key = "tokenuid"
 
 // ExtractUID verifies idToken and extracts usertoken
-func ExtractUID(next http.Handler) http.Handler {
+func ExtractUID(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		idToken, err := r.Cookie("token")
+		idToken := r.Header.Get("token")
+		token, err := config.Client.VerifyIDToken(context.TODO(), idToken)
+
 		if err != nil {
 			log.Println("ExtractUID: ", err)
 			responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 			return
 		}
-		token, err := config.Client.VerifyIDToken(context.TODO(), idToken.Value)
-		if err != nil {
-			log.Println("ExtractUID: ", err)
-			responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
-			return
-		}
+
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, "tokenuid", token)
-		next.ServeHTTP(w, r.WithContext(ctx))
+		h.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
