@@ -76,7 +76,7 @@ func CreateNewUser(user FirebaseUser) error {
 		return err
 	}
 
-	// err = utilities.SendEmailVerificationLink(user.Email)
+	// err = utils.SendEmailVerificationLink(user.Email)
 	// if err != nil {
 	// 	log.Printf("Error at CreateNewUser User.go : %v", err)
 	// 	return err
