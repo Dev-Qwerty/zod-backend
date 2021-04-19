@@ -17,7 +17,7 @@ import (
 // ExtractUID verifies idToken and extracts usertoken
 func ExtractUID(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		idToken := r.Header.Get("token")
+		idToken := r.Header.Get("Authorization")
 		token, err := config.Client.VerifyIDToken(context.TODO(), idToken)
 
 		if err != nil {
