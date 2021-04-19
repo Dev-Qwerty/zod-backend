@@ -5,7 +5,9 @@ const memberSchema = new mongoose.Schema({
     name: String,
     fid: String,
     memberid: String,
-    imgUrl: String
+    imgUrl: String,
+    role: String,
+    email: String
 })
 
 const channelSchema = new mongoose.Schema({
