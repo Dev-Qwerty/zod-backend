@@ -38,6 +38,18 @@ router
                 channelName,
                 channelid: nanoid()
             })
+            let memberDetails = await channelModel.find({
+                projectid,
+                channelName: '#everyone',
+                members: {
+                    $elemMatch: {
+                        fid: req.decodedToken.uid
+                    }
+                }
+            },
+                'members.$ -_id'
+            )
+            newChannel.members.push(memberDetails[0].members[0])
             for (let i = 0; i < req.body.members.length; i++) {
                 let memberDetails = await channelModel.find({
                     projectid,
@@ -50,11 +62,12 @@ router
                 },
                     'members.$ -_id'
                 )
-                newChannel.members[i] = memberDetails[0].members[0]
+                newChannel.members.push(memberDetails[0].members[0])
             }
             newChannel.save()
             res.status(201).send('channel created')
         } catch (error) {
+            console.log(error)
             res.status(500).send(error)
         }
     })
