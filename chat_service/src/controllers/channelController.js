@@ -41,6 +41,10 @@ router
             imgUrl,
             email
         })
+        newUser.role.push({
+            projectid: req.body.projectid,
+            role: req.body.member.role
+        })
         newUser.save()
             .then(doc => {
                 console.log(doc)
