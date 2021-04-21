@@ -20,6 +20,8 @@ router
             newChannel.members = req.body.members
             newChannel.channelName = '#everyone'
             newChannel.channelid = nanoid()
+            newChannel.members[0].channelAdmin = false
+            console.log(newChannel)
             newChannel.save()
             res.end()
         } catch (error) {
@@ -49,6 +51,7 @@ router
             },
                 'members.$ -_id'
             )
+            memberDetails[0].members[0].channelAdmin = true
             newChannel.members.push(memberDetails[0].members[0])
             for (let i = 0; i < req.body.members.length; i++) {
                 let memberDetails = await channelModel.find({

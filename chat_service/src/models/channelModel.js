@@ -7,7 +7,8 @@ const memberSchema = new mongoose.Schema({
     memberid: String,
     imgUrl: String,
     role: String,
-    email: String
+    email: String,
+    channelAdmin: Boolean
 })
 
 const channelSchema = new mongoose.Schema({
