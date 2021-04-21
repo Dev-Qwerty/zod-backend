@@ -4,7 +4,14 @@ const userSchema = new mongoose.Schema({
     name: String,
     fid: String,
     imgUrl: String,
-    email: String
+    email: String,
+    role: [
+        {
+            _id: false,
+            projectid: String,
+            role: String
+        }
+    ]
 })
 
 const user = mongoose.model('users', userSchema)
