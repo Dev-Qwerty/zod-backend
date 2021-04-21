@@ -15,12 +15,16 @@ const nanoid = customAlphabet(keyStore, 12)
 // @desc Create new board
 router
     .route('/new')
-    .post( [parseJson], async (req, res) => {
-        const { boardName, createdBy, members, projectId, projectName } = req.body
+    .post( [parseJson], (req, res) => {
+        
+        const { boardName, members, projectId, projectName } = req.body
+
+        // Firebase decoded token
+        const decodedToken = req.decodedToken
 
         const boardId = "B" + nanoid()
 
-        // Create three cards(ToDo, Doing, Done) for every board
+        // Add three cards(ToDo, Doing, Done) to every board when created
         const cards = [
             {
                 cardId: "C" + nanoid(),
@@ -36,18 +40,27 @@ router
             }
         ]
 
+        // Push the creater as admin to member array
+        members.push({
+            email: decodedToken.email,
+            isAdmin: true
+        })
+
         newboard = new board({
             boardId,
             boardName,
-            createdBy,
             cards,
             members,
             projectId,
             projectName
         })
-        
-        await newboard.save()
-        res.status(201).send(newboard)
+
+        newboard.save().then( () => {
+            res.status(201).json({
+                boardId: newboard.boardId,
+                boardName: newboard.boardName,
+            })
+        })
     })
 
 module.exports = router
