@@ -5,7 +5,16 @@ const channelSchema = new mongoose.Schema({
     channelName: String,
     channelid: String,
     channelAdmin: String,
-    members: [String]
+    members: [
+        {
+            _id: false,
+            email: String,
+            isAdmin: {
+                type: Boolean,
+                default: false
+            }
+        }
+    ]
 })
 
 const channel = mongoose.model('channels', channelSchema);
