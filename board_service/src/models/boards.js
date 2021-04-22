@@ -20,6 +20,7 @@ const boardSchema = new mongoose.Schema({
             }
         }
     ],
+    type: String,
     projectId: String,
     projectName: String
 })

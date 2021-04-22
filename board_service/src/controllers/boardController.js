@@ -17,7 +17,7 @@ router
     .route('/new')
     .post( [parseJson], (req, res) => {
         
-        const { boardName, members, projectId, projectName } = req.body
+        const { boardName, members, type, projectId, projectName } = req.body
 
         // Firebase decoded token
         const decodedToken = req.decodedToken
@@ -51,6 +51,7 @@ router
             boardName,
             cards,
             members,
+            type,
             projectId,
             projectName
         })
@@ -59,6 +60,7 @@ router
             res.status(201).json({
                 boardId: newboard.boardId,
                 boardName: newboard.boardName,
+                boardType: newboard.type
             })
         })
     })
