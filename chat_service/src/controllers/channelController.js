@@ -102,4 +102,18 @@ router
         }
     })
 
+router
+    .route('/:projectid')
+    .get(async (req, res) => {
+        try {
+            const projectid = req.params.projectid
+            const email = req.decodedToken.email
+            const channels = await channelModel.find({ projectid, members: { $elemMatch: { email } } }, 'channelid channelName -_id')
+            res.status(200).send(channels)
+        } catch (error) {
+            console.log(`Get channels: ${error}`)
+            res.status(500).send(error)
+        }
+    })
+
 module.exports = router
