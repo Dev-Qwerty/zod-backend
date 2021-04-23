@@ -9,7 +9,7 @@ import (
 	"github.com/mailgun/mailgun-go/v4"
 )
 
-func SendMail(link string, email string, subjectline string) error {
+func SendMail(link ,name, email, subjectline string) error {
 
 	domain := os.Getenv("MAILGUN_DOMAIN")
 	apiKey := os.Getenv("MAINGUN_APIKEY")
@@ -22,6 +22,10 @@ func SendMail(link string, email string, subjectline string) error {
 	recipient := email
 
 	message := mg.NewMessage(sender, subject, body, recipient)
+	message.SetTemplate("emailverification")
+	message.AddTemplateVariable("name", name)
+	message.AddTemplateVariable("emailVerificationLink", link)
+	message.AddTemplateVariable("email", email)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
