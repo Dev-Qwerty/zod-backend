@@ -27,7 +27,6 @@ router
         newChannel.members.push(member)
         newChannel.save()
             .then(doc => {
-                console.log(doc)
                 res.end()
             })
             .catch(error => {
@@ -47,7 +46,6 @@ router
         })
         newUser.save()
             .then(doc => {
-                console.log(doc)
                 res.end()
             })
             .catch(error => {
@@ -81,6 +79,27 @@ router
             .catch(error => {
                 res.status(500).send(error)
             })
+    })
+
+
+router
+    .route('/delete')
+    .delete([parseJson], async (req, res) => {
+        try {
+            const { projectid, channelid } = req.body
+            const email = req.decodedToken.email
+            const doc = await channelModel.findOne({ projectid, channelid, members: { $elemMatch: { email } } }, 'members.$ -_id')
+            if (doc == null) res.status(401).send('Unauthorized')
+            if (doc.members[0].isAdmin == true) {
+                let doc = await channelModel.findOneAndDelete({ projectid, channelid })
+                res.status(200).json({ 'channelid': doc.channelid, 'message': 'channel deleted' })
+            } else {
+                res.status(401).send('Unauthorized')
+            }
+        } catch (error) {
+            console.log(`Delete channel: ${error}`)
+            res.status(500).send('Internal Server Error')
+        }
     })
 
 module.exports = router
