@@ -9,6 +9,7 @@ import (
 	"firebase.google.com/go/v4/auth"
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/config"
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/database"
+	"github.com/Dev-Qwerty/zod-backend/user_service/api/utils"
 )
 
 // User model
@@ -76,11 +77,11 @@ func CreateNewUser(user FirebaseUser) error {
 		return err
 	}
 
-	// err = utils.SendEmailVerificationLink(user.Email)
-	// if err != nil {
-	// 	log.Printf("Error at CreateNewUser User.go : %v", err)
-	// 	return err
-	// }
+	err = utils.SendEmailVerificationLink(user.Fname ,user.Email)
+	if err != nil {
+		log.Printf("Error at CreateNewUser User.go : %v", err)
+		return err
+	}
 
 	return nil
 }
