@@ -17,7 +17,7 @@ router
     .route('/new')
     .post( [parseJson], (req, res) => {
         
-        const { boardName, members, projectId, projectName } = req.body
+        const { boardName, members, type, projectId, projectName } = req.body
 
         // Firebase decoded token
         const decodedToken = req.decodedToken
@@ -51,6 +51,7 @@ router
             boardName,
             cards,
             members,
+            type,
             projectId,
             projectName
         })
@@ -59,8 +60,45 @@ router
             res.status(201).json({
                 boardId: newboard.boardId,
                 boardName: newboard.boardName,
+                boardType: newboard.type
             })
+        }).catch(error => {
+            console.log(error)
+            res.status(500).send(error)
         })
+    })
+
+// @route POST /api/board/delete
+// @desc Delete the board
+router
+    .route('/delete')
+    .post([parseJson], async (req, res) => {
+
+        const { boardId, projectId } = req.body
+
+        // Firebase decoded token
+        const email = req.decodedToken.email
+
+        try {
+            let doc = await board.findOne({
+                boardId, projectId, members: {
+                    $elemMatch: { email }
+                }
+            }, 'members.$ -_id')
+
+            if (doc == null) res.status(401).send("Unauthorized user")
+
+            if (doc.members[0].isAdmin == true) {
+                let doc = await board.findOneAndDelete({ boardId, projectId })
+                res.status(200).json({ boardId: doc.boardId, message: "Board deleted" })
+            } else {
+                res.status(401).send("Unathorized user")
+            }
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).send(error)
+        }
     })
 
 module.exports = router
