@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/Dev-Qwerty/zod-backend/user_service/api/config"
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/models"
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/responses"
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/utils"
@@ -76,7 +78,13 @@ func ResendEmail(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("Failed to send email : %v", err)
 		responses.ERROR(w, http.StatusBadRequest, err)
 	} else {
-		err = utils.SendEmailVerificationLink(email["email"])
+		u, err := config.Client.GetUserByEmail(context.Background(), email["email"])
+		if err != nil {
+			log.Printf("Error at ResendEmail user_controller.go: %v", err)
+			responses.ERROR(w, http.StatusInternalServerError, err)
+		}
+
+		err = utils.SendEmailVerificationLink(u.UserInfo.DisplayName, email["email"])
 		if err != nil {
 			log.Printf("Error at ResendEmail user_controller.go : %v", err)
 			responses.ERROR(w, http.StatusInternalServerError, err)
@@ -96,10 +104,16 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("Failed to send email: %v", err)
 		responses.ERROR(w, http.StatusBadRequest, err)
 	} else {
-		err = utils.SendPasswordResetLink(email["email"])
+		u, err := config.Client.GetUserByEmail(context.Background(), email["email"])
+		if err != nil {
+			log.Printf("Error at ResetPassword user_controller.go: %v", err)
+			responses.ERROR(w, http.StatusInternalServerError, err)
+		}
+
+		err = utils.SendPasswordResetLink(u.UserInfo.DisplayName, email["email"])
 
 		if err != nil {
-			log.Printf("Error at ResendEmail user_controller.go : %v", err)
+			log.Printf("Error at ResetPassword user_controller.go : %v", err)
 			responses.ERROR(w, http.StatusInternalServerError, err)
 		}
 
