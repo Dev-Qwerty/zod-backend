@@ -127,4 +127,45 @@ router
         // TODO: fetch messages
     })
 
+router
+    .route('/:projectid/:channelid/members')
+    .get(async (req, res) => {
+        try {
+            const { projectid, channelid } = req.params
+            const email = req.decodedToken.email
+            let doc = await channelModel.findOne({ projectid, channelid, members: { $elemMatch: { email } } })
+            if (doc == null) {
+                res.status(400).send('Bad request')
+                return
+            }
+            doc = await channelModel.aggregate([
+                {
+                    $match: {
+                        projectid, channelid, members: { $elemMatch: { email } }
+                    },
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'members.email',
+                        foreignField: 'email',
+                        as: 'channelMembers'
+                    }
+                },
+                {
+                    $project: {
+                        'channelMembers.name': 1,
+                        'channelMembers.email': 1,
+                        'channelMembers.imgUrl': 1
+                    }
+                }
+            ])
+            res.status(200).send(doc[0].channelMembers)
+        } catch (error) {
+            console.log(error)
+            res.status(500).send('Internal Server Error')
+        }
+
+    })
+
 module.exports = router
