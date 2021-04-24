@@ -3,10 +3,57 @@ package utils
 import (
 	"context"
 	"log"
+	"os"
+	"time"
 
 	"firebase.google.com/go/v4/auth"
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/config"
+	"github.com/mailgun/mailgun-go/v4"
 )
+
+
+func SendMail(link, name, email, mode string) error {
+
+	var subject string
+
+	domain := os.Getenv("MAILGUN_DOMAIN")
+	apiKey := os.Getenv("MAINGUN_APIKEY")
+
+	mg := mailgun.NewMailgun(domain, apiKey)
+
+	sender := os.Getenv("MAILGUN_SENDER")
+	if mode == "emailverification" {
+		subject = "Verify your zode account"
+	}else {
+		subject = "Zode account password reset"
+	}
+	body := link
+	recipient := email
+
+	message := mg.NewMessage(sender, subject, body, recipient)
+
+	if mode == "emailverification" {
+		message.SetTemplate("emailverification")
+		message.AddTemplateVariable("emailVerificationLink", link)
+	}else {
+		message.SetTemplate("passwordreset")
+		message.AddTemplateVariable("passwordResetLink", link)
+	}
+	message.AddTemplateVariable("name", name)
+	message.AddTemplateVariable("email", email)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	_, _, err := mg.Send(ctx, message)
+
+	if err != nil {
+		log.Printf("Error at SendPasswordResetLink sendmail.go : %v", err)
+		return err
+	}
+
+	return nil
+}
 
 // SendEmailVerificationLink send link to verify the user's email
 func SendEmailVerificationLink(name, email string) error {
@@ -21,7 +68,8 @@ func SendEmailVerificationLink(name, email string) error {
 		return err
 	}
 
-	err = config.SendMail(link, name, email, "Verify your zode account")
+	err = SendMail(link, name, email, "emailverification")
+
 	if err != nil {
 		log.Printf("Error at SendEmailVerification sendMail.go : %v", err)
 		return err
@@ -43,7 +91,8 @@ func SendPasswordResetLink(name, email string) error {
 		return err
 	}
 
-	err = config.SendMail(link, name, email, "Reset your zode account password")
+	err = SendMail(link, name, email, "passwordreset")
+
 	if err != nil {
 		log.Printf("Error at SendPasswordResetLink sendmail.go : %v", err)
 		return err
