@@ -102,4 +102,70 @@ router
         }
     })
 
+router
+    .route('/:projectid')
+    .get(async (req, res) => {
+        try {
+            const projectid = req.params.projectid
+            const email = req.decodedToken.email
+            const channels = await channelModel.find({ projectid, members: { $elemMatch: { email } } }, 'channelid channelName -_id')
+            res.status(200).send(channels)
+        } catch (error) {
+            console.log(`Get channels: ${error}`)
+            res.status(500).send(error)
+        }
+    })
+
+router
+    .route('/:projectid/:channelid')
+    .get(async (req, res) => {
+        const { projectid, channelid } = req.params
+        const email = req.decodedToken.email
+        const doc = await channelModel.findOne({ projectid, channelid, members: { $elemMatch: { email } } }, 'members.isAdmin.$ -_id')
+        if (doc == null || doc.members[0].isAdmin == false) res.status(401).send('Unauthorized')
+        if (doc.members[0].isAdmin == true) res.status(200).send(doc.members[0].isAdmin)
+        // TODO: fetch messages
+    })
+
+router
+    .route('/:projectid/:channelid/members')
+    .get(async (req, res) => {
+        try {
+            const { projectid, channelid } = req.params
+            const email = req.decodedToken.email
+            let doc = await channelModel.findOne({ projectid, channelid, members: { $elemMatch: { email } } })
+            if (doc == null) {
+                res.status(400).send('Bad request')
+                return
+            }
+            doc = await channelModel.aggregate([
+                {
+                    $match: {
+                        projectid, channelid, members: { $elemMatch: { email } }
+                    },
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'members.email',
+                        foreignField: 'email',
+                        as: 'channelMembers'
+                    }
+                },
+                {
+                    $project: {
+                        'channelMembers.name': 1,
+                        'channelMembers.email': 1,
+                        'channelMembers.imgUrl': 1
+                    }
+                }
+            ])
+            res.status(200).send(doc[0].channelMembers)
+        } catch (error) {
+            console.log(error)
+            res.status(500).send('Internal Server Error')
+        }
+
+    })
+
 module.exports = router
