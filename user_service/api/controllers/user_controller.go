@@ -33,6 +33,19 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// FetchUser fetch details of a single user 
+func FetchUser(w http.ResponseWriter, r *http.Request) {
+	uid := r.Context().Value("uid").(string)
+
+	user, err := models.FetchUser(uid)
+	if err != nil {
+		log.Printf("Failed to fetch user: %v", err)
+		responses.ERROR(w, http.StatusBadRequest, err)
+	} else {
+		responses.JSON(w, http.StatusOK, user)
+	}
+}
+
 // Update updates the user data
 func Update(w http.ResponseWriter, r *http.Request) {
 

@@ -87,6 +87,23 @@ func CreateNewUser(user FirebaseUser) error {
 	return nil
 }
 
+// FetchUser fetch a single user details from db
+func FetchUser(uid string) (map[string]string, error) {
+	user := &User{}
+	resp := make(map[string] string)
+	err := database.DB.Model(user).Column("fname", "lname", "email").Where("id = ?", uid).Select()
+	if err != nil {
+		log.Printf("Error at FetchUser User.go: %v", err)
+		return resp, err
+	}
+
+	resp["fname"] = user.Fname
+	resp["lname"] = user.Lname
+	resp["email"] = user.Email
+	
+	return resp, nil
+}
+
 // UpdateUser updates the user data
 func UpdateUser(data UpdatedUser) error {
 	user := &User{}
