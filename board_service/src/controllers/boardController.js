@@ -3,6 +3,7 @@ const { customAlphabet } = require('nanoid')
 
 // Board model
 const board = require('../models/boards')
+const user = require('../models/user')
 
 const router = express.Router()
 const parseJson = express.json({ extended: true })
@@ -10,6 +11,35 @@ const parseJson = express.json({ extended: true })
 // Create 12 digit alphanumeric code for boardId and chardId
 const keyStore = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const nanoid = customAlphabet(keyStore, 12)
+
+// @route GET /api/board/:projectid
+// @desc Fetch list of all boards
+router
+    .route('/:projectId')
+    .get(async (req, res) => {
+        const { projectId } = req.params
+        const email = req.decodedToken.email
+
+        try {
+            let doc = await user.findOne({
+                email, role: {
+                    $elemMatch: { projectId }
+                }
+            })
+
+            if (doc == null) {
+                res.status(401).send("Unauthorized user")
+                return
+            }
+
+            doc = await board.find({ projectId }, 'boardId boardName type -_id')
+            res.status(200).send(doc)
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).send(error)
+        }
+    })
 
 // @route POST /api/board/new
 // @desc Create new board

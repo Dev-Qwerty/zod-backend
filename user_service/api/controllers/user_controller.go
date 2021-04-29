@@ -33,18 +33,45 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// FetchUser fetch details of a single user 
+func FetchUser(w http.ResponseWriter, r *http.Request) {
+	uid := r.Context().Value("uid").(string)
+
+	user, err := models.FetchUser(uid)
+	if err != nil {
+		log.Printf("Failed to fetch user: %v", err)
+		responses.ERROR(w, http.StatusBadRequest, err)
+	} else {
+		responses.JSON(w, http.StatusOK, user)
+	}
+}
+
 // Update updates the user data
 func Update(w http.ResponseWriter, r *http.Request) {
 
-	data := models.UpdatedUser{}
-	data.ID = r.Context().Value("uid").(string)
-
+	var data map[string]string
 	err := json.NewDecoder(r.Body).Decode(&data)
+
+	user := models.UpdatedUser{}
+	user.ID = r.Context().Value("uid").(string)
+	
+	if v, found := data["email"]; found {
+		user.Email = v
+	}
+
+	if v, found := data["fname"]; found {
+		user.Fname = v
+	}
+
+	if v, found := data["lname"]; found {
+		user.Lname = v
+	}
+	
 	if err != nil {
 		log.Printf("Failed decoding user: %v", err)
 		responses.ERROR(w, http.StatusBadRequest, err)
 	} else {
-		err := models.UpdateUser(data)
+		err := models.UpdateUser(user)
 		if err != nil {
 			fmt.Printf("Failed to update user: %v", err)
 			responses.ERROR(w, http.StatusInternalServerError, err)
