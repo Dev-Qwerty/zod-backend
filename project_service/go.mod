@@ -10,6 +10,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/joho/godotenv v1.3.0
 	github.com/satori/go.uuid v1.2.0
+	github.com/segmentio/kafka-go v0.4.15
 	github.com/segmentio/ksuid v1.0.3
 	go.mongodb.org/mongo-driver v1.4.4
 	golang.org/x/oauth2 v0.0.0-20210113205817-d3ed898aa8a3 // indirect
