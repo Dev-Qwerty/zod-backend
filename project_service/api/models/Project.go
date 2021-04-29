@@ -7,6 +7,7 @@ import (
 
 	"firebase.google.com/go/v4/auth"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/database"
+	"github.com/Dev-Qwerty/zod-backend/project_service/api/messageQueue"
 	uuid "github.com/satori/go.uuid"
 	"github.com/segmentio/ksuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -51,6 +52,31 @@ func (p *Project) CreateProject() (string, error) {
 		log.Println("CreateProject: ", err)
 		return "", err
 	}
+
+	type MemberStruct struct {
+		Name   string `json:"name"`
+		Fid    string `json:"fid"`
+		ImgUrl string `json:"imgUrl"`
+		Role   string `json:"role"`
+		Email  string `json:"email"`
+	}
+
+	type kafkaMessageStruct struct {
+		Projectid string       `json:"projectid"`
+		Member    MemberStruct `json:"member"`
+	}
+
+	var KafkaMessage = kafkaMessageStruct{
+		Projectid: p.ProjectID,
+		Member: MemberStruct{
+			Name:   (*p.Members)[0].Name,
+			Fid:    (*p.Members)[0].UserID,
+			ImgUrl: "",
+			Role:   (*p.Members)[0].Role,
+			Email:  (*p.Members)[0].Email,
+		},
+	}
+	messageQueue.WriteMessage("Create Project", KafkaMessage)
 	id := createdProjectID.InsertedID.(string)
 	return id, nil
 }
