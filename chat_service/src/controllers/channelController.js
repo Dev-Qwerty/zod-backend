@@ -109,6 +109,10 @@ router
             const projectid = req.params.projectid
             const email = req.decodedToken.email
             const channels = await channelModel.find({ projectid, members: { $elemMatch: { email } } }, 'channelid channelName -_id')
+            if (channels == null) {
+                res.status(400).send('Bad request')
+                return
+            }
             res.status(200).send(channels)
         } catch (error) {
             console.log(`Get channels: ${error}`)
