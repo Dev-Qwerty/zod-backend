@@ -1,5 +1,7 @@
 const kafka = require('./kafkaConfig')
-const { CreateChannelEveryone } = require('./service')
+const { CreateChannelEveryone,
+    AcceptProjectInvite
+} = require('./service')
 
 const kafkaConsumer = async () => {
     try {
@@ -10,6 +12,8 @@ const kafkaConsumer = async () => {
             eachMessage: async ({ topic, partition, message }) => {
                 if (message.key.toString() == 'Create Project') {
                     CreateChannelEveryone(JSON.parse(message.value))
+                } else if (message.key.toString() == 'Accept Project Invite') {
+                    AcceptProjectInvite(JSON.parse(message.value))
                 }
             }
         })

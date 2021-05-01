@@ -9,7 +9,7 @@ const CreateChannelEveryone = async (message) => {
     const member = {}
     const newChannel = new channelModel({
         projectid: message.projectid,
-        channelName: '#everyone',
+        channelName: 'everyone',
         channelid: nanoid(),
 
     })
@@ -38,6 +38,19 @@ const CreateChannelEveryone = async (message) => {
         })
 }
 
+const AcceptProjectInvite = async (message) => {
+    await channelModel.findOneAndUpdate({ projectid: message.projectid, channelName: 'everyone' }, { $push: { members: { isAdmin: false, email: message.member.email } } })
+    const { name, fid, imgUrl, email } = message.member
+    projectRole = []
+    projectRole.push({
+        projectid: message.projectid,
+        role: message.member.role
+    })
+    await userModel.findOneAndUpdate({ email }, { name, fid, email, imgUrl, $push: { projectRole } }, { upsert: true, new: true })
+
+}
+
 module.exports = {
-    CreateChannelEveryone
+    CreateChannelEveryone,
+    AcceptProjectInvite
 }
