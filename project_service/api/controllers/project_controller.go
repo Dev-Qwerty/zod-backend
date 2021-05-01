@@ -144,7 +144,7 @@ func AcceptInviteHandler(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusBadRequest, errors.New("failed to accept invitation"))
 		return
 	}
-	responses.JSON(w, http.StatusOK, nil)
+	responses.JSON(w, http.StatusOK, "Project Invitation Accepted")
 }
 
 func RejectInviteHandler(w http.ResponseWriter, r *http.Request) {

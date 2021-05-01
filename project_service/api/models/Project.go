@@ -164,7 +164,7 @@ func (p *Project) AcceptInvite(userDetails *auth.UserInfo) error {
 	zodeProjectCollection := database.Client.Database("zodeProjectDB").Collection("projects")
 	err := zodeProjectCollection.FindOne(context.TODO(), filter, options.FindOne().SetProjection(projection)).Decode(&project)
 	if err != nil {
-		log.Println("AcceptInvite: ", err)
+		log.Println("AcceptInvite: <User not in Pending Invites>", err)
 		return err
 	}
 	pendinginvite := &[]PendingInvite{}
@@ -187,6 +187,7 @@ func (p *Project) AcceptInvite(userDetails *auth.UserInfo) error {
 		return err
 	}
 
+	// Remove user from pending Invites
 	update = bson.M{
 		"$pull": bson.M{
 			"pendingInvites": bson.M{
@@ -198,6 +199,31 @@ func (p *Project) AcceptInvite(userDetails *auth.UserInfo) error {
 		log.Println("AcceptInvite: ", err)
 		return err
 	}
+
+	type MemberStruct struct {
+		Name   string `json:"name"`
+		Fid    string `json:"fid"`
+		ImgUrl string `json:"imgUrl"`
+		Role   string `json:"role"`
+		Email  string `json:"email"`
+	}
+
+	type kafkaMessageStruct struct {
+		Projectid string       `json:"projectid"`
+		Member    MemberStruct `json:"member"`
+	}
+
+	var KafkaMessage = kafkaMessageStruct{
+		Projectid: p.ProjectID,
+		Member: MemberStruct{
+			Name:   member.Name,
+			Fid:    member.UserID,
+			ImgUrl: "",
+			Role:   member.Role,
+			Email:  member.Email,
+		},
+	}
+	messageQueue.WriteMessage("Accept Project Invite", KafkaMessage)
 
 	return nil
 }
