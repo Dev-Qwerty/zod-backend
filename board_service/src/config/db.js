@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-mongoose.connect(process.env.MONGOURI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGOURI, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: true })
 .catch((error) => {
     console.error(`Failed to connect to db: ${error}`)
 })

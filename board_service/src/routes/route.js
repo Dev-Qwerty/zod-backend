@@ -4,7 +4,7 @@ const isUserVerified = require('../middlewares/verifyUser')
 
 const router = (app) => {
     
-    app.use('/api/everyone', userController)
+    app.use('/api/everyone', userController.router)
     app.use('/api/board', isUserVerified, boardController)
     
 }

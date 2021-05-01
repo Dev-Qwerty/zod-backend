@@ -1,11 +1,11 @@
 const mongoose = require('mongoose')
 
 const userSchema = new mongoose.Schema({
-    fid: String,
     name: String,
+    fid: String,
     email: String,
     imgUrl: String,
-    role: [
+    projects: [
         {
             _id: false,
             projectId: String,
