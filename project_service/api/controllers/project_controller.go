@@ -37,12 +37,12 @@ func CreateProjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	project.Teamlead = userDetails.DisplayName
 
-	// creating member model of the user created the project with an owner role
+	// creating member model of the user created the project with an Admin role
 	member := &models.Member{}
 	member.Name = userDetails.DisplayName
 	member.Email = userDetails.Email
 	member.UserID = userDetails.UID
-	member.Role = "Owner"
+	member.Role = "Admin"
 	MemberID := uuid.NewV4().String()
 	member.MemberID = MemberID[24:]
 

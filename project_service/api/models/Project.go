@@ -128,7 +128,7 @@ func (p *Project) AddProjectMembers(email string) error {
 		"projectMembers": bson.M{
 			"$elemMatch": bson.M{
 				"email":    userEmail,
-				"userRole": "Owner",
+				"userRole": "Admin",
 			},
 		},
 	}
@@ -282,13 +282,13 @@ func (p *Project) LeaveProject(email string) error {
 }
 
 func RemoveProjectMember(email, memberID string, projectID string) error {
-	// check if the user is owner
+	// check if the user is Admin
 	filter := bson.M{
 		"_id": projectID,
 		"projectMembers": bson.M{
 			"$elemMatch": bson.M{
 				"email":    email,
-				"userRole": "Owner",
+				"userRole": "Admin",
 			},
 		},
 	}
@@ -397,7 +397,7 @@ func ChangeMemberRole(requestBody map[string]string, email string) error {
 		"projectMembers": bson.M{
 			"$elemMatch": bson.M{
 				"email":    email,
-				"userRole": "Owner",
+				"userRole": "Admin",
 			},
 		},
 	}
