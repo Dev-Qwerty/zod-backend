@@ -384,7 +384,7 @@ func TeamMembers(projectid string) (map[string]interface{}, error) {
 	projection := bson.M{
 		"projectMembers.name":     1,
 		"projectMembers.userRole": 1,
-		"projectMembers.memberID": 1,
+		"projectMembers.email":    1,
 		"_id":                     0,
 	}
 
