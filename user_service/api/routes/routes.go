@@ -22,6 +22,7 @@ func InitializeRoutes(r *mux.Router) {
 	projectRouter.HandleFunc("/update", controllers.UpdateProject).Methods("PUT", "OPTIONS")
 	projectRouter.HandleFunc("/delete", controllers.DeleteProject).Methods("DELETE", "OPTIONS")
 	etm.Use(middlewares.ExtractToken)
+	etm.HandleFunc("/", controllers.FetchUser).Methods("GET", "OPTIONS")
 	etm.HandleFunc("/update", controllers.Update).Methods("PUT", "OPTIONS")
 	etm.HandleFunc("/delete", controllers.Delete).Methods("DELETE", "OPTIONS")
 }

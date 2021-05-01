@@ -34,8 +34,9 @@ type FirebaseUser struct {
 // UpdatedUser model
 type UpdatedUser struct {
 	ID    string
-	Field string
-	Value string
+	Fname string `json:"fname"`
+	Lname string `json:"lname"`
+	Email string `json:"email"`
 }
 
 // NewProject model
@@ -86,36 +87,53 @@ func CreateNewUser(user FirebaseUser) error {
 	return nil
 }
 
+// FetchUser fetch a single user details from db
+func FetchUser(uid string) (map[string]string, error) {
+	user := &User{}
+	resp := make(map[string] string)
+	err := database.DB.Model(user).Column("fname", "lname", "email").Where("id = ?", uid).Select()
+	if err != nil {
+		log.Printf("Error at FetchUser User.go: %v", err)
+		return resp, err
+	}
+
+	resp["fname"] = user.Fname
+	resp["lname"] = user.Lname
+	resp["email"] = user.Email
+	
+	return resp, nil
+}
+
 // UpdateUser updates the user data
 func UpdateUser(data UpdatedUser) error {
 	user := &User{}
 	user.ID = data.ID
 
-	switch data.Field {
-	case "email":
-		user.Email = data.Value
+	if data.Email != "" {
+		user.Email = data.Email
 		_, err := database.DB.Model(user).Set("email = ?email").Where("id = ?id").Update()
 		if err != nil {
 			log.Printf("Error at UpdatUser User.go : %v", err)
 			return err
 		}
-	case "fname":
-		user.Fname = data.Value
+	}
+	if data.Fname != "" {
+		user.Fname = data.Fname
 		_, err := database.DB.Model(user).Set("fname = ?fname").Where("id = ?id").Update()
 		if err != nil {
 			log.Printf("Error at UpdatUser User.go : %v", err)
 			return err
 		}
-	case "lname":
-		user.Lname = data.Value
+	}
+	if data.Lname != "" {
+		user.Lname = data.Lname
 		_, err := database.DB.Model(user).Set("lname = ?lname").Where("id = ?id").Update()
 		if err != nil {
 			log.Printf("Error at UpdatUser User.go : %v", err)
 			return err
 		}
-	default:
-		return errors.New("invalid field")
 	}
+
 	return nil
 }
 

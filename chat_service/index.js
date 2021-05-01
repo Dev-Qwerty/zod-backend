@@ -4,6 +4,9 @@ require('dotenv').config()
 const VerifyUser = require('./src/middlewares/verifyuser')
 require('./src/config/db')
 require('./src/config/firebase')
+const kafkaConsumer = require('./src/messageQueue/consumer')
+kafkaConsumer()
+
 
 const initializeRoutes = require('./src/routes/route')
 

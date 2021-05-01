@@ -12,7 +12,7 @@ import (
 // ExtractToken extracts the use from the idToken
 func ExtractToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("token")
+		token := r.Header.Get("Authorization")
 
 		u, err := config.Client.VerifyIDToken(context.TODO(), token)
 		if err != nil {
