@@ -7,6 +7,7 @@ import (
 
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/config"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/database"
+	"github.com/Dev-Qwerty/zod-backend/project_service/api/messageQueue"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/routes"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -41,5 +42,7 @@ func Run() {
 		log.Printf("Failed to initialize firebase: %v", err)
 	}
 	database.InitializeDB()
+
+	messageQueue.InitializeMessageQueue()
 
 }

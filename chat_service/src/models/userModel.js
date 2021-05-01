@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
     fid: String,
     imgUrl: String,
     email: String,
-    role: [
+    projectRole: [
         {
             _id: false,
             projectid: String,
