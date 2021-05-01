@@ -24,17 +24,12 @@ const CreateChannelEveryone = async (message) => {
             console.log(error)
         })
     const { name, fid, imgUrl, email } = message.member
-    const newUser = new userModel({
-        name,
-        fid,
-        imgUrl,
-        email
-    })
-    newUser.role.push({
+    projectRole = []
+    projectRole.push({
         projectid: message.projectid,
         role: message.member.role
     })
-    newUser.save()
+    userModel.findOneAndUpdate({ email }, { name, fid, email, imgUrl, $push: { projectRole } }, { upsert: true, new: true })
         .then(doc => {
             console.log(doc)
         })
