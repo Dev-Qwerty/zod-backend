@@ -1,10 +1,5 @@
-const express = require('express')
-
 // User model
 const User = require('../models/user')
-
-const router = express.Router()
-const parseJson = express.json({ extended: true })
 
 // Add user details to db
 // When the user creates or accept a project
@@ -19,8 +14,4 @@ const newUser = (value) => {
         })
 }
 
-
-module.exports = {
-    router,
-    newUser
-}
+module.exports = newUser
