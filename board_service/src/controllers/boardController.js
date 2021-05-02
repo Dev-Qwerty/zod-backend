@@ -1,7 +1,7 @@
 const express = require('express')
 const { customAlphabet } = require('nanoid')
 
-// Board model
+// Import models
 const board = require('../models/boards')
 const user = require('../models/user')
 
