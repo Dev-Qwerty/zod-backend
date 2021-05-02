@@ -54,4 +54,29 @@ router
 
     })
 
+router
+    .route('/delete')
+    .post([parseJson], async (req, res) => {
+        const { itemId } = req.body
+
+        const decodedToken = req.decodedToken
+
+        const { email } = decodedToken
+        try {
+            let doc = await item.findOne({
+                itemId, $or: [{ assigned: { $elemMatch: { email } } }, { createdBy: email }]
+            })
+
+            if (doc == null) {
+                res.status(401).send("Unauthorized user")
+            } else {
+                let doc = await item.findOneAndDelete({ itemId })
+                res.status(200).json({ itemId: doc.itemId, message: "Item deleted" })
+            }
+        } catch (error) {
+            console.log(error)
+            res.status(500).send(error)
+        }
+    })
+
 module.exports = router
