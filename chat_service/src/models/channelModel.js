@@ -5,6 +5,7 @@ const channelSchema = new mongoose.Schema({
     channelName: String,
     channelid: String,
     channelAdmin: String,
+    description: String,
     members: [
         {
             _id: false,

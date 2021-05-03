@@ -52,7 +52,7 @@ const nanoid = customAlphabet(alphabet, 12);
 router
     .route('/new')
     .post([parseJson], async (req, res) => {
-        const { projectid, channelName, members } = req.body
+        const { projectid, channelName, description, members } = req.body
         members.push({
             email: req.decodedToken.email,
             isAdmin: true
@@ -61,6 +61,7 @@ router
             projectid,
             channelName,
             channelid: nanoid(),
+            description,
             members
         })
         newChannel.save()
