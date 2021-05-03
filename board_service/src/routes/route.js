@@ -1,11 +1,11 @@
 const boardController = require('../controllers/boardController')
-const itemController = require('../controllers/itemController')
+const cardController = require('../controllers/cardController')
 const isUserVerified = require('../middlewares/verifyUser')
 
 const router = (app) => {
 
     app.use('/api/board', isUserVerified, boardController)
-    app.use('/api/item', isUserVerified, itemController)
+    app.use('/api/card', isUserVerified, cardController)
     
 }
 

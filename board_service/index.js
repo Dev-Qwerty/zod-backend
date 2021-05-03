@@ -3,7 +3,7 @@ require('dotenv').config()
 
 require('./src/config/db')
 const router = require('./src/routes/route')
-require('./src/messageQueues/consumer').kafkaConsumer
+// require('./src/messageQueues/consumer').kafkaConsumer
 
 const app = express()
 

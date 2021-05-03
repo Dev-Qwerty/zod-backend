@@ -2,50 +2,50 @@ const express = require('express')
 const { customAlphabet } = require('nanoid')
 
 // Import models
-const item = require('../models/items')
+const card = require('../models/card')
 
 const router = express.Router()
 const parseJson = express.json({ extended: true })
 
-// Create 12 digit alphanumeric code for itemId
+// Create 12 digit alphanumeric code for cardId
 const keyStore = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const nanoid = customAlphabet(keyStore, 16)
 
-// @route POST /api/item/new
-// @desc Create new card item
+// @route POST /api/card/new
+// @desc Create new list card
 router
     .route('/new')
     .post([parseJson], (req, res) => {
-        const { itemName, itemDescription, dueDate, assigned, card, projectId } = req.body
+        const { cardName, cardDescription, dueDate, assigned, list, projectId } = req.body
 
         // Firebase decoded token
         const decodedToken = req.decodedToken
 
-        const itemId = "I" + nanoid()
+        const cardId = "I" + nanoid()
 
         createdBy = decodedToken.email
 
-        newItem = new item({
-            itemId,
-            itemName,
-            itemDescription,
+        newCard = new card({
+            cardId,
+            cardName,
+            cardDescription,
             dueDate,
             createdBy,
             assigned,
-            card,
+            list,
             projectId
         })
 
-        newItem.save().then(() => {
+        newCard.save().then(() => {
             res.status(201).json({
-                itemId: newItem.itemId,
-                itemName: newItem.itemName,
-                itemDescription: newItem.itemDescription,
-                dueDate: newItem.dueDate,
-                createdBy: newItem.createdBy,
-                assigned: newItem.assigned,
-                card: newItem.card,
-                project: newItem.projectId
+                cardId: newCard.cardId,
+                cardName: newCard.cardName,
+                cardDescription: newCard.cardDescription,
+                dueDate: newCard.dueDate,
+                createdBy: newCard.createdBy,
+                assigned: newCard.assigned,
+                list: newCard.list,
+                project: newCard.projectId
             })
         }).catch(error => {
             console.log(error)
@@ -57,21 +57,21 @@ router
 router
     .route('/delete')
     .post([parseJson], async (req, res) => {
-        const { itemId } = req.body
+        const { cardId } = req.body
 
         const decodedToken = req.decodedToken
 
         const { email } = decodedToken
         try {
-            let doc = await item.findOne({
-                itemId, $or: [{ assigned: { $elemMatch: { email } } }, { createdBy: email }]
+            let doc = await card.findOne({
+                cardId, $or: [{ assigned: { $elemMatch: { email } } }, { createdBy: email }]
             })
 
             if (doc == null) {
                 res.status(401).send("Unauthorized user")
             } else {
-                let doc = await item.findOneAndDelete({ itemId })
-                res.status(200).json({ itemId: doc.itemId, message: "Item deleted" })
+                let doc = await card.findOneAndDelete({ cardId })
+                res.status(200).json({ cardId: doc.cardId, message: "Card deleted" })
             }
         } catch (error) {
             console.log(error)
