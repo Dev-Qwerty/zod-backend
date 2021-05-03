@@ -1,8 +1,8 @@
 const express = require('express')
 const { customAlphabet } = require('nanoid')
 
-// Board model
-const board = require('../models/boards')
+// Import models
+const board = require('../models/board')
 const user = require('../models/user')
 
 const router = express.Router()
@@ -22,7 +22,7 @@ router
 
         try {
             let doc = await user.findOne({
-                email, role: {
+                email, projects: {
                     $elemMatch: { projectId }
                 }
             })
@@ -55,18 +55,18 @@ router
         const boardId = "B" + nanoid()
 
         // Add three cards(ToDo, Doing, Done) to every board when created
-        const cards = [
+        const lists = [
             {
-                cardId: "C" + nanoid(),
-                cardTitle: "To Do"
+                listId: "L" + nanoid(),
+                listTitle: "To Do"
             },
             {
-                cardId: "C" + nanoid(),
-                cardTitle: "Doing"
+                listId: "L" + nanoid(),
+                listTitle: "Doing"
             },
             {
-                cardId: "C" + nanoid(),
-                cardTitle: "Done"
+                listId: "L" + nanoid(),
+                listTitle: "Done"
             }
         ]
 
@@ -79,7 +79,7 @@ router
         newboard = new board({
             boardId,
             boardName,
-            cards,
+            lists,
             members,
             type,
             projectId,
