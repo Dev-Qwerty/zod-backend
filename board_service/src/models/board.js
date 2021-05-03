@@ -3,11 +3,11 @@ const mongoose = require('mongoose')
 const boardSchema = new mongoose.Schema({
     boardId: String,
     boardName: String,
-    cards: [
+    lists: [
         {
             _id: false,
-            cardId: String,
-            cardTitle: String
+            listId: String,
+            listTitle: String
         }
     ],
     members: [

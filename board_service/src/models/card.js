@@ -1,9 +1,9 @@
 const mongoose = require('mongoose')
 
-const itemSchema = new mongoose.Schema({
-    itemId: String,
-    itemName: String,
-    itemDescription: String,
+const cardSchema = new mongoose.Schema({
+    cardId: String,
+    cardName: String,
+    cardDescription: String,
     dueDate: String,
     assigned: [
         {
@@ -14,13 +14,13 @@ const itemSchema = new mongoose.Schema({
         }
     ],
     createdBy: String,
-    card: {
+    list: {
         _id: false,
-        cardId: String,
-        cardTitle: String
+        listId: String,
+        listTitle: String
     },
     projectId: String
 })
 
-const items = mongoose.model('items', itemSchema)
-module.exports = items
+const cards = mongoose.model('cards', cardSchema)
+module.exports = cards
