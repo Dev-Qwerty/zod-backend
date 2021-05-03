@@ -322,7 +322,7 @@ func RemoveProjectMember(email, memberID string, projectID string) error {
 	update := bson.M{
 		"$pull": bson.M{
 			"projectMembers": bson.M{
-				"memberID": memberID,
+				"email": email,
 			},
 		}}
 	result, err := zodeProjectCollection.UpdateOne(context.TODO(), filter, update)

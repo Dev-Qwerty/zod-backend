@@ -198,7 +198,7 @@ func RemoveProjectMemberHandler(w http.ResponseWriter, r *http.Request) {
 
 	type Details struct {
 		ProjectID string `json:"projectID,omitempty"`
-		MemberID  string `json:"memberID,omitempty"`
+		Email     string `json:"email,omitempty"`
 	}
 	var detail *Details
 	err := json.NewDecoder(r.Body).Decode(&detail)
@@ -207,7 +207,7 @@ func RemoveProjectMemberHandler(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	err = models.RemoveProjectMember(tokenStruct.Claims["email"].(string), detail.MemberID, detail.ProjectID)
+	err = models.RemoveProjectMember(tokenStruct.Claims["email"].(string), detail.Email, detail.ProjectID)
 	if err != nil {
 		log.Println("RemoveProjectMemberHandler: ", err)
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
