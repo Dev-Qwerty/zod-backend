@@ -440,7 +440,7 @@ func ChangeMemberRole(requestBody map[string]string, email string) error {
 		"_id": requestBody["projectID"],
 		"projectMembers": bson.M{
 			"$elemMatch": bson.M{
-				"memberID": requestBody["memberID"],
+				"email": requestBody["email"],
 			},
 		},
 	}
