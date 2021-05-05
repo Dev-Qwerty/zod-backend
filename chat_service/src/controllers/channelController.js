@@ -69,6 +69,7 @@ router
                 res.status(201).json({
                     channelid: doc.channelid,
                     channelName: doc.channelName,
+                    description: doc.description,
                     isAdmin: true
                 })
             })
@@ -119,12 +120,17 @@ router
 router
     .route('/:projectid/:channelid')
     .get(async (req, res) => {
-        const { projectid, channelid } = req.params
-        const email = req.decodedToken.email
-        const doc = await channelModel.findOne({ projectid, channelid, members: { $elemMatch: { email } } }, 'members.isAdmin.$ -_id')
-        if (doc == null || doc.members[0].isAdmin == false) res.status(401).send('Unauthorized')
-        if (doc.members[0].isAdmin == true) res.status(200).send(doc.members[0].isAdmin)
-        // TODO: fetch messages
+        try {
+            const { projectid, channelid } = req.params
+            const email = req.decodedToken.email
+            const doc = await channelModel.findOne({ projectid, channelid, members: { $elemMatch: { email } } }, 'members.isAdmin.$ -_id')
+            if (doc == null || doc.members[0].isAdmin == false) res.status(401).send('Unauthorized')
+            if (doc.members[0].isAdmin == true) res.status(200).json({ "isAdmin": doc.members[0].isAdmin })
+            // TODO: fetch messages
+        } catch (error) {
+            console.log(`Get Channel: ${error}`)
+        }
+
     })
 
 router
