@@ -358,9 +358,9 @@ func GetPendingInvites(email string) ([]map[string]interface{}, error) {
 		log.Println("GetPendingInvites: ", err)
 		return invites, err
 	}
-	var invite map[string]interface{}
-	for cursor.Next(context.TODO()) {
 
+	for cursor.Next(context.TODO()) {
+		var invite map[string]interface{}
 		err := cursor.Decode(&invite)
 		if err != nil {
 			log.Println("GetPendingInvites: ", err)
