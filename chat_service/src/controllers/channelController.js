@@ -53,6 +53,16 @@ router
     .route('/new')
     .post([parseJson], async (req, res) => {
         const { projectid, channelName, description, members } = req.body
+        const checkProject = await channelModel.findOne({ projectid, channelName: 'everyone' })
+        if (checkProject == null) {
+            res.status(400).send('Bad request')
+            return
+        }
+        const channel = await channelModel.findOne({ projectid, channelName })
+        if (channel != null) {
+            res.status(400).send('Channel Name already exists')
+            return
+        }
         members.push({
             email: req.decodedToken.email,
             isAdmin: true
