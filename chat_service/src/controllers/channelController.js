@@ -53,6 +53,16 @@ router
     .route('/new')
     .post([parseJson], async (req, res) => {
         const { projectid, channelName, description, members } = req.body
+        const checkProject = await channelModel.findOne({ projectid, channelName: 'everyone' })
+        if (checkProject == null) {
+            res.status(400).send('Bad request')
+            return
+        }
+        const channel = await channelModel.findOne({ projectid, channelName })
+        if (channel != null) {
+            res.status(400).send('Channel Name already exists')
+            return
+        }
         members.push({
             email: req.decodedToken.email,
             isAdmin: true
@@ -69,6 +79,7 @@ router
                 res.status(201).json({
                     channelid: doc.channelid,
                     channelName: doc.channelName,
+                    description: doc.description,
                     isAdmin: true
                 })
             })
@@ -119,12 +130,17 @@ router
 router
     .route('/:projectid/:channelid')
     .get(async (req, res) => {
-        const { projectid, channelid } = req.params
-        const email = req.decodedToken.email
-        const doc = await channelModel.findOne({ projectid, channelid, members: { $elemMatch: { email } } }, 'members.isAdmin.$ -_id')
-        if (doc == null || doc.members[0].isAdmin == false) res.status(401).send('Unauthorized')
-        if (doc.members[0].isAdmin == true) res.status(200).send(doc.members[0].isAdmin)
-        // TODO: fetch messages
+        try {
+            const { projectid, channelid } = req.params
+            const email = req.decodedToken.email
+            const doc = await channelModel.findOne({ projectid, channelid, members: { $elemMatch: { email } } }, 'members.isAdmin.$ -_id')
+            if (doc == null || doc.members[0].isAdmin == false) res.status(401).send('Unauthorized')
+            if (doc.members[0].isAdmin == true) res.status(200).json({ "isAdmin": doc.members[0].isAdmin })
+            // TODO: fetch messages
+        } catch (error) {
+            console.log(`Get Channel: ${error}`)
+        }
+
     })
 
 router

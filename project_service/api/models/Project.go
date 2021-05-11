@@ -322,7 +322,7 @@ func RemoveProjectMember(email, memberID string, projectID string) error {
 	update := bson.M{
 		"$pull": bson.M{
 			"projectMembers": bson.M{
-				"memberID": memberID,
+				"email": email,
 			},
 		}}
 	result, err := zodeProjectCollection.UpdateOne(context.TODO(), filter, update)
@@ -358,9 +358,9 @@ func GetPendingInvites(email string) ([]map[string]interface{}, error) {
 		log.Println("GetPendingInvites: ", err)
 		return invites, err
 	}
-	var invite map[string]interface{}
-	for cursor.Next(context.TODO()) {
 
+	for cursor.Next(context.TODO()) {
+		var invite map[string]interface{}
 		err := cursor.Decode(&invite)
 		if err != nil {
 			log.Println("GetPendingInvites: ", err)
@@ -440,7 +440,7 @@ func ChangeMemberRole(requestBody map[string]string, email string) error {
 		"_id": requestBody["projectID"],
 		"projectMembers": bson.M{
 			"$elemMatch": bson.M{
-				"memberID": requestBody["memberID"],
+				"email": requestBody["email"],
 			},
 		},
 	}
