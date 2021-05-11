@@ -45,12 +45,24 @@ router
 // @desc Create new board
 router
     .route('/new')
-    .post( [parseJson], (req, res) => {
+    .post([parseJson], async (req, res) => {
         
         const { boardName, members, type, projectId, projectName } = req.body
 
         // Firebase decoded token
-        const decodedToken = req.decodedToken
+        const email = req.decodedToken.email
+
+        // Check if the user is inside the project
+        let doc = await user.findOne({
+            email, projects: {
+                $elemMatch: { projectId }
+            }
+        })
+
+        if (doc == null) {
+            res.status(401).send("Unauthorized user")
+            return
+        }
 
         const boardId = "B" + nanoid()
 
@@ -72,7 +84,7 @@ router
 
         // Push the creater as admin to member array
         members.push({
-            email: decodedToken.email,
+            email: email,
             isAdmin: true
         })
 
@@ -116,7 +128,10 @@ router
                 }
             }, 'members.$ -_id')
 
-            if (doc == null) res.status(401).send("Unauthorized user")
+            if (doc == null) {
+                res.status(401).send("Unauthorized user")
+                return
+            }
 
             if (doc.members[0].isAdmin == true) {
                 let doc = await board.findOneAndDelete({ boardId, projectId })
