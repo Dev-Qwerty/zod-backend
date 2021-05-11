@@ -47,7 +47,8 @@ router
     .route('/new')
     .post([parseJson], async (req, res) => {
         
-        const { boardName, members, type, projectId, projectName } = req.body
+        const { boardName, type, projectId, projectName } = req.body
+        let members = req.body.members
 
         // Firebase decoded token
         const email = req.decodedToken.email
@@ -82,13 +83,21 @@ router
             }
         ]
 
-        // Push the creater as admin to member array
-        members.push({
-            email: email,
-            isAdmin: true
-        })
+        if (type == "public") {
+            // Push the creator as admin to member array(public boards)
+            members.push({
+                email: email,
+                isAdmin: true
+            })
+        } else {
+            // Set creator as admin to member array(private boards)
+            members = {
+                email: email,
+                isAdmin: true
+            }
+        }
 
-        newboard = new board({
+        let newboard = new board({
             boardId,
             boardName,
             lists,
