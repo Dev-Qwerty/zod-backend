@@ -4,12 +4,12 @@ const socketio = require('socket.io')
 require('dotenv').config()
 
 require('./src/config/db')
-require('./src/config/firebase')
+const firebaseAuth = require('./src/config/firebase')
 
 const VerifyUser = require('./src/middlewares/verifyuser')
 
-const kafkaConsumer = require('./src/messageQueue/consumer')
-kafkaConsumer()
+// const kafkaConsumer = require('./src/messageQueue/consumer')
+// kafkaConsumer()
 
 const app = express()
 const server = http.createServer(app)
@@ -28,8 +28,16 @@ const io = socketio(server, {
 
 const projectSpaces = io.of(/.*$/)
 projectSpaces.use((socket, next) => {
-    //Todo: verify user and return email
-    next()
+    const idToken = socket.handshake.auth.token
+    firebaseAuth.verifyIdToken(idToken)
+        .then((decodedToken) => {
+            socket.email = decodedToken.email
+            next()
+        })
+        .catch((error) => {
+            console.log('VerifyUser: ', error)
+            next(new Error('Authentication error'));
+        })
 })
 
 projectSpaces.on("connection", socket => {
