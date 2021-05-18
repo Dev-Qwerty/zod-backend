@@ -11,19 +11,21 @@ const parseJson = express.json({ extended: true })
 const keyStore = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const nanoid = customAlphabet(keyStore, 16)
 
-// @route POST /api/card/new
-// @desc Create new list card
-router
-    .route('/new')
-    .post([parseJson], (req, res) => {
-        const { cardName, cardDescription, dueDate, assigned, list, projectId } = req.body
+const boardChannel = (namespace, socket, app) => {
 
-        // Firebase decoded token
-        const decodedToken = req.decodedToken
+    socket.on('joinRoom', (room) => {
+        socket.join(room)
+    })
+
+    // @route POST /api/card/new
+    // @desc Create new list card
+    app.post('/api/:board/card/new', [parseJson], (req, res) => {
+        const room = req.params.board
+        const { cardName, cardDescription, dueDate, assigned, list, projectId } = req.body
 
         const cardId = "I" + nanoid()
 
-        createdBy = decodedToken.email
+        createdBy = socket.email
 
         newCard = new card({
             cardId,
@@ -37,7 +39,7 @@ router
         })
 
         newCard.save().then(() => {
-            res.status(201).json({
+            const response = {
                 cardId: newCard.cardId,
                 cardName: newCard.cardName,
                 cardDescription: newCard.cardDescription,
@@ -46,37 +48,43 @@ router
                 assigned: newCard.assigned,
                 list: newCard.list,
                 project: newCard.projectId
-            })
+            }
+
+            res.status(201).send('card created')
+            namespace.to(room).emit('createCard', response)
         }).catch(error => {
             console.log(error)
             res.status(500).send(error)
         })
-
     })
 
-router
-    .route('/delete')
-    .post([parseJson], async (req, res) => {
-        const { cardId } = req.body
 
-        const decodedToken = req.decodedToken
+    router
+        .route('/delete')
+        .post([parseJson], async (req, res) => {
+            const { cardId } = req.body
 
-        const { email } = decodedToken
-        try {
-            let doc = await card.findOne({
-                cardId, $or: [{ assigned: { $elemMatch: { email } } }, { createdBy: email }]
-            })
+            const decodedToken = req.decodedToken
 
-            if (doc == null) {
-                res.status(401).send("Unauthorized user")
-            } else {
-                let doc = await card.findOneAndDelete({ cardId })
-                res.status(200).json({ cardId: doc.cardId, message: "Card deleted" })
+            const { email } = decodedToken
+            try {
+                let doc = await card.findOne({
+                    cardId, $or: [{ assigned: { $elemMatch: { email } } }, { createdBy: email }]
+                })
+
+                if (doc == null) {
+                    res.status(401).send("Unauthorized user")
+                } else {
+                    let doc = await card.findOneAndDelete({ cardId })
+                    res.status(200).json({ cardId: doc.cardId, message: "Card deleted" })
+                }
+            } catch (error) {
+                console.log(error)
+                res.status(500).send(error)
             }
-        } catch (error) {
-            console.log(error)
-            res.status(500).send(error)
-        }
-    })
+        })
+}
 
-module.exports = router
+
+// module.exports = router
+module.exports = boardChannel
