@@ -1,5 +1,5 @@
 const boardController = require('../controllers/boardController')
-const cardController = require('../controllers/cardController')
+const cardController = require('../socket/boardChannel')
 const listController = require('../controllers/listController')
 const isUserVerified = require('../middlewares/verifyUser')
 
