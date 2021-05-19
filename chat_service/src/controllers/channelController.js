@@ -49,6 +49,9 @@ const nanoid = customAlphabet(alphabet, 12);
 //             })
 //     })
 
+
+// @route POST /api/channel/new
+// @desc Create new channel
 router
     .route('/new')
     .post([parseJson], async (req, res) => {
@@ -89,6 +92,8 @@ router
     })
 
 
+// @route DELETE /api/channel/delete
+// @desc delete channel
 router
     .route('/delete')
     .delete([parseJson], async (req, res) => {
@@ -109,6 +114,9 @@ router
         }
     })
 
+
+// @route GET /api/channel/:projectid
+// @desc fetch all channels in a project
 router
     .route('/:projectid')
     .get(async (req, res) => {
@@ -127,6 +135,10 @@ router
         }
     })
 
+
+
+// @route GET /api/channel/:projectid/:channelid
+// @desc fetch channel details
 router
     .route('/:projectid/:channelid')
     .get(async (req, res) => {
@@ -143,6 +155,9 @@ router
 
     })
 
+
+// @route GET /api/channel/:projectid/:channelid/members
+// @desc fetch channel members
 router
     .route('/:projectid/:channelid/members')
     .get(async (req, res) => {
@@ -183,5 +198,28 @@ router
         }
 
     })
+
+    // @route POST /api/channel/:projectid/:channelid
+    // @desc add new member to a channel
+    .post([parseJson], async (req, res) => {
+        const projectid = req.params.projectid
+        const channelid = req.params.channelid
+        const members = req.body.members
+        const email = req.decodedToken.email
+
+        const checkUserisAdmin = await channelModel.findOne({ projectid, channelid, members: { $elemMatch: { email, isAdmin: 'true' } } })
+        if (checkUserisAdmin != null) {
+            for (i = 0; i < members.length; i++) {
+                const email = members[i].email
+                const projectMember = await channelModel.findOne({ projectid, channelName: 'everyone', members: { $elemMatch: { email } } })
+                if (projectMember != null) {
+                    await channelModel.updateOne({ projectid, channelid }, { $push: { members: { email: email, isAdmin: "false" } } })
+                }
+            }
+            res.status(200).send('success')
+        }
+        res.status(401).send("Unauthorized")
+    })
+
 
 module.exports = router
