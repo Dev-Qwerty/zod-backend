@@ -34,7 +34,7 @@ boardNamespace.use((socket, next) => {
 
 boardNamespace.on('connection', (socket) => {
     const namespace = socket.nsp
-    require('./src/controllers/cardController')(namespace, socket, app)
+    require('./src/socket/boardChannel')(namespace, socket, app)
 })
 
 server.listen(3000, () => {

@@ -18,7 +18,7 @@ const boardChannel = (namespace, socket, app) => {
         socket.join(room)
     })
 
-    // @route PSOT /api/list/new
+    // @route PSOT /api/:board/list/new
     // @desc Create a new list
     app.post('/api/:board/list/new', [parseJson], async (req, res) => {
         try {
@@ -49,7 +49,7 @@ const boardChannel = (namespace, socket, app) => {
         }
     })
 
-    // @route POST /api/card/new
+    // @route POST /api/:board/card/new
     // @desc Create new list card
     app.post('/api/:board/card/new', [parseJson], async (req, res) => {
         try {
