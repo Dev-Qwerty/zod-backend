@@ -5,6 +5,7 @@ const isUserVerified = (req, res, next) => {
         req.decodedToken = decodedToken
         next()
     }).catch( (error) => {
+        console.log(error)
         res.status(401).send(error)
     })
 }

@@ -43,6 +43,44 @@ router
         }
     })
 
+// @route GET /api/board/lists/:boardid
+// @desc Fetch the list and cards in the board
+router
+    .route('/lists/:boardId')
+    .get(async (req, res) => {
+        try {
+            const boardId = req.params.boardId
+
+            // Fetch email from Firebase decodedToken
+            const email = req.decodedToken.email
+
+            // Check if the user is the member of the board
+            let doc = await Board.findOne({
+                boardId, members: {
+                    $elemMatch: { email }
+                }
+            })
+
+            if (doc == null) {
+                res.status(401).send("Unauthorized user")
+            }
+
+            const list = await List.find({ boardId })
+            const card = await Card.find({ boardId })
+
+            const response = {
+                lists: list,
+                cards: card
+            }
+
+            res.status(200).send(response)
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).send(error)
+        }
+    })
+
 // @route POST /api/board/new
 // @desc Create new board
 router
