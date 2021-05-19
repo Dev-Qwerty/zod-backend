@@ -5,6 +5,7 @@ const { customAlphabet } = require('nanoid')
 const Board = require('../models/board')
 const User = require('../models/user')
 const List = require('../models/list')
+const Card = require('../models/card')
 
 const router = express.Router()
 const parseJson = express.json({ extended: true })
@@ -93,33 +94,6 @@ router
 
             await newboard.save()
 
-            // Create first three list when creating the board
-            const ToDo = new List({
-                listId: "L" + nanoid(),
-                title: "To Do",
-                index: 1,
-                createdBy: email,
-                boardId
-            })
-            const InProgress = new List({
-                listId: "L" + nanoid(),
-                title: "In Progress",
-                index: 2,
-                createdBy: email,
-                boardId
-            })
-            const Completed = new List({
-                listId: "L" + nanoid(),
-                title: "Completed",
-                index: 3,
-                createdBy: email,
-                boardId
-            })
-
-            await ToDo.save()
-            await InProgress.save()
-            await Completed.save()
-
             res.status(201).json({
                 boardId: newboard.boardId,
                 boardName: newboard.boardName,
@@ -129,17 +103,6 @@ router
             console.log(error)
             res.status(500).send(error)
         }
-
-        // newboard.save().then( () => {
-        //     res.status(201).json({
-        //         boardId: newboard.boardId,
-        //         boardName: newboard.boardName,
-        //         boardType: newboard.type
-        //     })
-        // }).catch(error => {
-        //     console.log(error)
-        //     res.status(500).send(error)
-        // })
     })
 
 // @route POST /api/board/delete
@@ -154,7 +117,7 @@ router
         const email = req.decodedToken.email
 
         try {
-            let doc = await board.findOne({
+            let doc = await Board.findOne({
                 boardId, projectId, members: {
                     $elemMatch: { email }
                 }
@@ -166,7 +129,9 @@ router
             }
 
             if (doc.members[0].isAdmin == true) {
-                let doc = await board.findOneAndDelete({ boardId, projectId })
+                let doc = await Board.findOneAndDelete({ boardId, projectId })
+                await List.deleteMany({ boardId })
+                await Card.deleteMany({ boardId })
                 res.status(200).json({ boardId: doc.boardId, message: "Board deleted" })
             } else {
                 res.status(401).send("Unathorized user")

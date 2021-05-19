@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const listSchema = new mongoose.Schema({
     listId: String,
     title: String,
-    index: Number,
+    pos: Number,
     createdBy: String,
     boardId: String
 })

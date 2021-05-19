@@ -5,6 +5,7 @@ const cardSchema = new mongoose.Schema({
     cardName: String,
     cardDescription: String,
     dueDate: String,
+    pos: Number,
     assigned: [
         {
             _id: false,
