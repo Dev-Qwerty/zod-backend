@@ -3,14 +3,16 @@ const mongoose = require('mongoose')
 const chatSchema = new mongoose.Schema({
     projectid: String,
     channelid: String,
-    sender: {
+    author: {
+        imgUrl: String,
         name: String,
         email: String
     },
-    date: String,
-    time: String,
-    type: String,
-    message: String
+    date: {
+        type: Date,
+        default: Date.now()
+    },
+    content: String
 })
 
 const chat = mongoose.model('chats', chatSchema);
