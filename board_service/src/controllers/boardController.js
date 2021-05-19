@@ -2,8 +2,10 @@ const express = require('express')
 const { customAlphabet } = require('nanoid')
 
 // Import models
-const board = require('../models/board')
-const user = require('../models/user')
+const Board = require('../models/board')
+const User = require('../models/user')
+const List = require('../models/list')
+const Card = require('../models/card')
 
 const router = express.Router()
 const parseJson = express.json({ extended: true })
@@ -21,7 +23,7 @@ router
         const email = req.decodedToken.email
 
         try {
-            let doc = await user.findOne({
+            let doc = await User.findOne({
                 email, projects: {
                     $elemMatch: { projectId }
                 }
@@ -32,8 +34,46 @@ router
                 return
             }
 
-            doc = await board.find({ projectId }, 'boardId boardName type -_id')
+            doc = await Board.find({ projectId }, 'boardId boardName type -_id')
             res.status(200).send(doc)
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).send(error)
+        }
+    })
+
+// @route GET /api/board/lists/:boardid
+// @desc Fetch the list and cards in the board
+router
+    .route('/lists/:boardId')
+    .get(async (req, res) => {
+        try {
+            const boardId = req.params.boardId
+
+            // Fetch email from Firebase decodedToken
+            const email = req.decodedToken.email
+
+            // Check if the user is the member of the board
+            let doc = await Board.findOne({
+                boardId, members: {
+                    $elemMatch: { email }
+                }
+            })
+
+            if (doc == null) {
+                res.status(401).send("Unauthorized user")
+            }
+
+            const list = await List.find({ boardId })
+            const card = await Card.find({ boardId })
+
+            const response = {
+                lists: list,
+                cards: card
+            }
+
+            res.status(200).send(response)
 
         } catch (error) {
             console.log(error)
@@ -46,77 +86,74 @@ router
 router
     .route('/new')
     .post([parseJson], async (req, res) => {
-        
-        const { boardName, type, projectId, projectName } = req.body
-        let members = req.body.members
+        try {
+            const { boardName, type, projectId, projectName } = req.body
+            let members = req.body.members
 
-        // Firebase decoded token
-        const email = req.decodedToken.email
+            for (i = 0; i < members.length; i++) {
+                const email = members[i].email
+                let doc = await User.findOne({
+                    email, projects: {
+                        $elemMatch: { projectId }
+                    }
+                })
 
-        // Check if the user is inside the project
-        let doc = await user.findOne({
-            email, projects: {
-                $elemMatch: { projectId }
+                if (doc == null) {
+                    delete members[i]
+                }
             }
-        })
 
-        if (doc == null) {
-            res.status(401).send("Unauthorized user")
-            return
-        }
+            // Firebase decoded token
+            const email = req.decodedToken.email
 
-        const boardId = "B" + nanoid()
-
-        // Add three cards(ToDo, Doing, Done) to every board when created
-        const lists = [
-            {
-                listId: "L" + nanoid(),
-                listTitle: "To Do"
-            },
-            {
-                listId: "L" + nanoid(),
-                listTitle: "Doing"
-            },
-            {
-                listId: "L" + nanoid(),
-                listTitle: "Done"
-            }
-        ]
-
-        if (type == "public") {
-            // Push the creator as admin to member array(public boards)
-            members.push({
-                email: email,
-                isAdmin: true
+            // Check if the user is inside the project
+            let doc = await User.findOne({
+                email, projects: {
+                    $elemMatch: { projectId }
+                }
             })
-        } else {
-            // Set creator as admin to member array(private boards)
-            members = {
-                email: email,
-                isAdmin: true
+
+            if (doc == null) {
+                res.status(401).send("Unauthorized user")
+                return
             }
-        }
 
-        let newboard = new board({
-            boardId,
-            boardName,
-            lists,
-            members,
-            type,
-            projectId,
-            projectName
-        })
+            const boardId = "B" + nanoid()
 
-        newboard.save().then( () => {
+            if (type == "public") {
+                // Push the creator as admin to member array(public boards)
+                members.push({
+                    email: email,
+                    isAdmin: true
+                })
+            } else {
+                // Set creator as admin to member array(private boards)
+                members = {
+                    email: email,
+                    isAdmin: true
+                }
+            }
+
+            let newboard = new Board({
+                boardId,
+                boardName,
+                members,
+                type,
+                projectId,
+                projectName
+            })
+
+            await newboard.save()
+
             res.status(201).json({
                 boardId: newboard.boardId,
                 boardName: newboard.boardName,
                 boardType: newboard.type
             })
-        }).catch(error => {
+        } catch (error) {
             console.log(error)
             res.status(500).send(error)
-        })
+        }
     })
 
 // @route POST /api/board/delete
@@ -131,7 +168,7 @@ router
         const email = req.decodedToken.email
 
         try {
-            let doc = await board.findOne({
+            let doc = await Board.findOne({
                 boardId, projectId, members: {
                     $elemMatch: { email }
                 }
@@ -143,7 +180,9 @@ router
             }
 
             if (doc.members[0].isAdmin == true) {
-                let doc = await board.findOneAndDelete({ boardId, projectId })
+                let doc = await Board.findOneAndDelete({ boardId, projectId })
+                await List.deleteMany({ boardId })
+                await Card.deleteMany({ boardId })
                 res.status(200).json({ boardId: doc.boardId, message: "Board deleted" })
             } else {
                 res.status(401).send("Unathorized user")
