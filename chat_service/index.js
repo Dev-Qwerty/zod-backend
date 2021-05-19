@@ -42,7 +42,7 @@ projectSpaces.use((socket, next) => {
 
 projectSpaces.on("connection", socket => {
     const projectSpace = socket.nsp
-    require('./src/socket/channelMessage')(projectSpace, socket)
+    require('./src/socket/channelMessage')(projectSpace, socket, app)
 })
 
 server.listen(process.env.PORT, () => {
