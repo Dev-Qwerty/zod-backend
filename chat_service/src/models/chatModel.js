@@ -3,7 +3,8 @@ const mongoose = require('mongoose')
 const chatSchema = new mongoose.Schema({
     projectid: String,
     channelid: String,
-    sender: {
+    author: {
+        imgUrl: String,
         name: String,
         email: String
     },
@@ -11,7 +12,7 @@ const chatSchema = new mongoose.Schema({
         type: Date,
         default: Date.now()
     },
-    message: String
+    content: String
 })
 
 const chat = mongoose.model('chats', chatSchema);
