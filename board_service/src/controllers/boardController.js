@@ -52,6 +52,19 @@ router
             const { boardName, type, projectId, projectName } = req.body
             let members = req.body.members
 
+            for (i = 0; i < members.length; i++) {
+                const email = members[i].email
+                let doc = await User.findOne({
+                    email, projects: {
+                        $elemMatch: { projectId }
+                    }
+                })
+
+                if (doc == null) {
+                    delete members[i]
+                }
+            }
+
             // Firebase decoded token
             const email = req.decodedToken.email
 
