@@ -216,7 +216,9 @@ router
                     await channelModel.updateOne({ projectid, channelid }, { $push: { members: { email: email, isAdmin: "false" } } })
                 }
             }
-            res.status(200).send('success')
+            const channelMembers = await channelModel.findOne({ projectid, channelid }, 'members -_id')
+            res.status(200).send(channelMembers)
+            return
         }
         res.status(401).send("Unauthorized")
     })
