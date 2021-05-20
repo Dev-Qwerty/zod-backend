@@ -85,7 +85,7 @@ func (p *Project) CreateProject() (string, error) {
 
 	requestBody := bytes.NewBuffer(details)
 
-	http.Post("http://localhost:8081/api/channel/everyone/new", "application/json", requestBody) //For testing
+	http.Post("https://zode-chat-service-test.herokuapp.com/api/channel/everyone/new", "application/json", requestBody) //For testing
 	// messageQueue.WriteMessage("Create Project", KafkaMessage)
 	id := createdProjectID.InsertedID.(string)
 	return id, nil
@@ -238,7 +238,7 @@ func (p *Project) AcceptInvite(userDetails *auth.UserInfo) error {
 
 	requestBody := bytes.NewBuffer(details)
 
-	http.Post("http://localhost:8081/api/channel/acceptinvite", "application/json", requestBody) //For testing
+	http.Post("https://zode-chat-service-test.herokuapp.com/channel/acceptinvite", "application/json", requestBody) //For testing
 	// messageQueue.WriteMessage("Accept Project Invite", KafkaMessage)
 
 	return nil
