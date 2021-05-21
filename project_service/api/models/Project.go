@@ -238,7 +238,7 @@ func (p *Project) AcceptInvite(userDetails *auth.UserInfo) error {
 
 	requestBody := bytes.NewBuffer(details)
 
-	http.Post("https://zode-chat-service-test.herokuapp.com/channel/acceptinvite", "application/json", requestBody) //For testing
+	http.Post("https://zode-chat-service-test.herokuapp.com/api/channel/acceptinvite", "application/json", requestBody) //For testing
 	// messageQueue.WriteMessage("Accept Project Invite", KafkaMessage)
 
 	return nil
