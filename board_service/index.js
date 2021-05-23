@@ -2,7 +2,7 @@ const express = require('express')
 const socket = require('socket.io')
 const http = require('http')
 
-if (process.env.NODE_ENV != production) {
+if (process.env.NODE_ENV != "production") {
     require('dotenv').config()
 }
 
