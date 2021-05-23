@@ -1,7 +1,10 @@
 const express = require('express')
 const socket = require('socket.io')
 const http = require('http')
-require('dotenv').config()
+
+if (process.env.NODE_ENV != production) {
+    require('dotenv').config()
+}
 
 require('./src/config/db')
 const router = require('./src/routes/route')
