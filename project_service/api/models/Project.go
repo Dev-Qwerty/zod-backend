@@ -1,13 +1,17 @@
 package models
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"log"
+	"net/http"
 
 	"firebase.google.com/go/v4/auth"
 	"github.com/Dev-Qwerty/zod-backend/project_service/api/database"
-	"github.com/Dev-Qwerty/zod-backend/project_service/api/messageQueue"
+
+	// "github.com/Dev-Qwerty/zod-backend/project_service/api/messageQueue"
 	uuid "github.com/satori/go.uuid"
 	"github.com/segmentio/ksuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -76,7 +80,13 @@ func (p *Project) CreateProject() (string, error) {
 			Email:  (*p.Members)[0].Email,
 		},
 	}
-	messageQueue.WriteMessage("Create Project", KafkaMessage)
+
+	details, _ := json.Marshal(KafkaMessage)
+
+	requestBody := bytes.NewBuffer(details)
+
+	http.Post("https://zode-chat-service-test.herokuapp.com/api/channel/everyone/new", "application/json", requestBody) //For testing
+	// messageQueue.WriteMessage("Create Project", KafkaMessage)
 	id := createdProjectID.InsertedID.(string)
 	return id, nil
 }
@@ -223,7 +233,13 @@ func (p *Project) AcceptInvite(userDetails *auth.UserInfo) error {
 			Email:  member.Email,
 		},
 	}
-	messageQueue.WriteMessage("Accept Project Invite", KafkaMessage)
+
+	details, _ := json.Marshal(KafkaMessage)
+
+	requestBody := bytes.NewBuffer(details)
+
+	http.Post("https://zode-chat-service-test.herokuapp.com/api/channel/acceptinvite", "application/json", requestBody) //For testing
+	// messageQueue.WriteMessage("Accept Project Invite", KafkaMessage)
 
 	return nil
 }
