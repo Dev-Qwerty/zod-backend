@@ -14,6 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Add board service remote origin
-        run: git remote add heroku-userservice https://heroku:${{ secrets.HEROKU_API_TOKEN }}@git.heroku.com/${{ secrets.HEROKU_BOARDSERVICE_URI }}.git
+        run: git remote add heroku-boardservice https://heroku:${{ secrets.HEROKU_API_TOKEN }}@git.heroku.com/${{ secrets.HEROKU_BOARDSERVICE_URI }}.git
       - name: Deploy board service to heroku
         run: git push heroku-boardservice `git subtree split --prefix board_service main`:refs/heads/main --force
