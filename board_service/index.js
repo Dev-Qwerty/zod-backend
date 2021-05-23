@@ -40,6 +40,8 @@ boardNamespace.on('connection', (socket) => {
     require('./src/socket/boardChannel')(namespace, socket, app)
 })
 
-server.listen(3000, () => {
+const PORT = process.env.PORT
+
+server.listen(PORT, () => {
     console.log('server running...')
 });
