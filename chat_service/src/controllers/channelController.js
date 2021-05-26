@@ -5,6 +5,7 @@ const router = express.Router()
 const parseJson = express.json({ extended: true })
 
 const channelModel = require('../models/channelModel')
+const userModel = require('../models/userModel')
 
 
 const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -221,6 +222,27 @@ router
             return
         }
         res.status(401).send("Unauthorized")
+    })
+
+router
+    .route('/:projectid/:channelid/fetchmembers')
+    .get(async (req, res) => {
+        const projectid = req.params.projectid
+        const channelid = req.params.channelid
+        let projectMembers = await userModel.find({ projectRole: { $elemMatch: { projectid } } }, 'email name imgUrl -_id')
+        let channelMembers = await channelModel.findOne({ projectid, channelid }, 'members -_id')
+        while (channelMembers.members.length > 0) {
+            j = 0
+            while (j < projectMembers.length) {
+                if (projectMembers[j].email == channelMembers.members[0].email) {
+                    projectMembers.splice(j, 1)
+                    channelMembers.members.splice(0, 1)
+                    break
+                }
+                j++
+            }
+        }
+        res.send(projectMembers)
     })
 
 
