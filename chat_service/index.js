@@ -2,6 +2,7 @@ const express = require('express')
 const http = require('http')
 const socketio = require('socket.io')
 const { customAlphabet } = require('nanoid');
+const cors = require('cors')
 
 if (process.env.NODE_ENV != "production") {
     require('dotenv').config()
@@ -23,6 +24,8 @@ const VerifyUser = require('./src/middlewares/verifyuser')
 
 const app = express()
 const server = http.createServer(app)
+
+app.use(cors())
 
 
 app.post('/api/channel/everyone/new', [parseJson], async (req, res) => {
@@ -103,6 +106,7 @@ projectSpaces.use((socket, next) => {
 
 projectSpaces.on("connection", socket => {
     const projectSpace = socket.nsp
+    socket.emit("connection", "socket connected")
     require('./src/socket/channelMessage')(projectSpace, socket, app)
 })
 
