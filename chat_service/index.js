@@ -94,7 +94,7 @@ const io = socketio(server, {
 
 const projectSpaces = io.of(/.*$/)
 projectSpaces.use((socket, next) => {
-    const idToken = socket.handshake.auth.token
+    const idToken = socket.handshake.auth.Authorization
     firebaseAuth.verifyIdToken(idToken)
         .then((decodedToken) => {
             socket.email = decodedToken.email
