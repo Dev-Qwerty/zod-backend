@@ -4,6 +4,8 @@ const socketio = require('socket.io')
 const { customAlphabet } = require('nanoid');
 const cors = require('cors')
 
+const parseJson = express.json({ extended: true })
+
 if (process.env.NODE_ENV != "production") {
     require('dotenv').config()
 }
