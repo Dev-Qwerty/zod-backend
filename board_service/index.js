@@ -1,6 +1,7 @@
 const express = require('express')
 const socket = require('socket.io')
 const http = require('http')
+const cors = require('cors')
 
 if (process.env.NODE_ENV != "production") {
     require('dotenv').config()
@@ -12,6 +13,8 @@ const router = require('./src/routes/route')
 const auth = require('./src/config/firebase')
 
 const app = express()
+
+app.use(cors())
 
 router(app)
 
