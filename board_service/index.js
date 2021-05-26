@@ -1,7 +1,11 @@
 const express = require('express')
 const socket = require('socket.io')
 const http = require('http')
-require('dotenv').config()
+const cors = require('cors')
+
+if (process.env.NODE_ENV != "production") {
+    require('dotenv').config()
+}
 
 require('./src/config/db')
 const router = require('./src/routes/route')
@@ -9,6 +13,8 @@ const router = require('./src/routes/route')
 const auth = require('./src/config/firebase')
 
 const app = express()
+
+app.use(cors())
 
 router(app)
 
@@ -37,6 +43,8 @@ boardNamespace.on('connection', (socket) => {
     require('./src/socket/boardChannel')(namespace, socket, app)
 })
 
-server.listen(3000, () => {
+const PORT = process.env.PORT
+
+server.listen(PORT, () => {
     console.log('server running...')
 });
