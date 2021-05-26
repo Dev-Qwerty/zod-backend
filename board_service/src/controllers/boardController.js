@@ -81,6 +81,52 @@ router
         }
     })
 
+// @route POST /api/board/member/new
+// @desc Add new members to the board
+router
+    .route('/member/new')
+    .post([parseJson], async (req, res) => {
+        try {
+            const { boardId, projectId, members } = req.body
+
+            const email = req.decodedToken.email
+
+            // Check if the user is inside the project(email owner)
+            let doc = await User.findOne({
+                email, projects: {
+                    $elemMatch: { projectId }
+                }
+            })
+
+            if (doc == null) {
+                res.status(401).send("Unauthorized user")
+                return
+            }
+
+            // Check if the members are in the project
+            for (i = 0; i < members.length; i++) {
+                const email = members[i].email
+                let doc = await User.findOne({
+                    email, projects: {
+                        $elemMatch: { projectId }
+                    }
+                })
+
+                if (doc == null) {
+                    members.splice(i, 1)
+                }
+            }
+
+            await Board.findOneAndUpdate({ boardId }, { $push: { members } })
+
+            res.status(200).send(members)
+
+        } catch (error) {
+            console.log(error)
+            res.status(500).send(error)
+        }
+    })
+
 // @route POST /api/board/new
 // @desc Create new board
 router
@@ -90,6 +136,22 @@ router
             const { boardName, type, projectId, projectName } = req.body
             let members = req.body.members
 
+            // Firebase decoded token
+            const email = req.decodedToken.email
+
+            // Check if the user is inside the project(email owner)
+            let doc = await User.findOne({
+                email, projects: {
+                    $elemMatch: { projectId }
+                }
+            })
+
+            if (doc == null) {
+                res.status(401).send("Unauthorized user")
+                return
+            }
+
+            // Check if members are inside the project(project members)
             for (i = 0; i < members.length; i++) {
                 const email = members[i].email
                 let doc = await User.findOne({
@@ -101,21 +163,6 @@ router
                 if (doc == null) {
                     delete members[i]
                 }
-            }
-
-            // Firebase decoded token
-            const email = req.decodedToken.email
-
-            // Check if the user is inside the project
-            let doc = await User.findOne({
-                email, projects: {
-                    $elemMatch: { projectId }
-                }
-            })
-
-            if (doc == null) {
-                res.status(401).send("Unauthorized user")
-                return
             }
 
             const boardId = "B" + nanoid()
