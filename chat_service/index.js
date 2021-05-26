@@ -106,6 +106,7 @@ projectSpaces.use((socket, next) => {
 
 projectSpaces.on("connection", socket => {
     const projectSpace = socket.nsp
+    socket.emit("connection", "connected to server")
     require('./src/socket/channelMessage')(projectSpace, socket, app)
 })
 
