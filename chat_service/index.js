@@ -1,10 +1,17 @@
 const express = require('express')
 const http = require('http')
 const socketio = require('socket.io')
+const { customAlphabet } = require('nanoid');
 
 if (process.env.NODE_ENV != "production") {
     require('dotenv').config()
 }
+
+const channelModel = require('./src/models/channelModel')
+const userModel = require('./src/models/userModel')
+
+const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+const nanoid = customAlphabet(alphabet, 12);
 
 require('./src/config/db')
 const firebaseAuth = require('./src/config/firebase')
