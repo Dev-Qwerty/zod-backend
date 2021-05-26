@@ -1,7 +1,10 @@
 const express = require('express')
 const http = require('http')
 const socketio = require('socket.io')
-require('dotenv').config()
+
+if (process.env.NODE_ENV != "production") {
+    require('dotenv').config()
+}
 
 require('./src/config/db')
 const firebaseAuth = require('./src/config/firebase')
