@@ -23,11 +23,11 @@ router
     .route('/new')
     .post([parseJson], async (req, res) => {
         try {
-            const { member, projectId } = req.body
+            const { member, projectid } = req.body
 
             const { name, fid, email, imgUrl, role } = member
             const projects = {
-                projectId,
+                projectId: projectid,
                 role
             }
 

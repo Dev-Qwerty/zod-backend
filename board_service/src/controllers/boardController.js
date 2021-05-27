@@ -104,17 +104,28 @@ router
             }
 
             // Check if the members are in the project
-            for (i = 0; i < members.length; i++) {
-                const email = members[i].email
-                let doc = await User.findOne({
-                    email, projects: {
-                        $elemMatch: { projectId }
-                    }
-                })
-
-                if (doc == null) {
-                    members.splice(i, 1)
+            doc = await User.find({
+                projects: {
+                    $elemMatch: { projectId }
                 }
+            }, 'email')
+
+            i = 0
+            while (i < members.length) {
+                j = 0
+                while (j < doc.length) {
+                    if (members[i].email == doc[j].email) {
+                        break
+                    }
+
+                    if (j == doc.length - 1) {
+                        members.splice(i, 1)
+                        i--
+                    }
+
+                    j++
+                }
+                i++
             }
 
             await Board.findOneAndUpdate({ boardId }, { $push: { members } })
@@ -151,18 +162,29 @@ router
                 return
             }
 
-            // Check if members are inside the project(project members)
-            for (i = 0; i < members.length; i++) {
-                const email = members[i].email
-                let doc = await User.findOne({
-                    email, projects: {
-                        $elemMatch: { projectId }
-                    }
-                })
-
-                if (doc == null) {
-                    delete members[i]
+            // Fetch all members in the project
+            doc = await User.find({
+                projects: {
+                    $elemMatch: { projectId }
                 }
+            }, 'email')
+
+            // Check if the members in req are in the project
+            i = 0
+            while (i < members.length) {
+                j = 0
+                while (j < doc.length) {
+                    if (members[i].email == doc[j].email) {
+                        break
+                    }
+
+                    if (j == doc.length - 1) {
+                        members.splice(i, 1)
+                        i--
+                    }
+                    j++
+                }
+                i++
             }
 
             const boardId = "B" + nanoid()
