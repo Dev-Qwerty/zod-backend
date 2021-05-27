@@ -23,13 +23,15 @@ router
     .route('/new')
     .post([parseJson], async (req, res) => {
         try {
-            const { member, projectId } = req.body
+            const { member, projectid } = req.body
 
             const { name, fid, email, imgUrl, role } = member
             const projects = {
-                projectId,
+                projectId: projectid,
                 role
             }
+
+            console.log(email)
 
             const doc = await User.findOneAndUpdate({ email }, { name, fid, email, imgUrl, $push: { projects } }, { upsert: true, new: true })
             res.status(200).send("Content added")
