@@ -31,8 +31,6 @@ router
                 role
             }
 
-            console.log(email)
-
             const doc = await User.findOneAndUpdate({ email }, { name, fid, email, imgUrl, $push: { projects } }, { upsert: true, new: true })
             res.status(200).send("Content added")
         } catch (error) {
