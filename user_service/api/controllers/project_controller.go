@@ -6,35 +6,37 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Dev-Qwerty/zod-backend/user_service/api/messageQueues"
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/models"
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/responses"
 )
 
 // Add projects of user to db
 func NewProject(w http.ResponseWriter, r *http.Request) {
-	
-	var project map[string]interface{}
 
-	// project, err := json.Marshal(Project{"7s3SzGn0lpfOKXEz1IqD2t1J1EQ2", "project101", "owner"})
+	// var project map[string]interface{} //Message queues
+	project := models.Project{}
+
 	err := json.NewDecoder(r.Body).Decode(&project)
 	if err != nil {
 		log.Printf("Error at Decode user project_controller.go: %v", err)
 	}
-	
+
+	/* Message Queues
 	projectByte, err := json.Marshal(project)
 	if err != nil {
 		log.Printf("Error at NewProject project_controller.go: %v", err)
 	}
-	
-	err = messageQueues.Produce("Create project", projectByte)
+	*/
+
+	// err = messageQueues.Produce("Create project", projectByte)
+	err = models.AddProject(project)
 	if err != nil {
 		fmt.Printf("Failed to save project: %v", err)
 		responses.ERROR(w, http.StatusInternalServerError, err)
-	}else {
-			responses.JSON(w, http.StatusOK, nil)
-		}
-	
+	} else {
+		responses.JSON(w, http.StatusOK, nil)
+	}
+
 }
 
 // Update project role of users

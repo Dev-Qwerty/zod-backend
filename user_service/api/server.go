@@ -7,7 +7,6 @@ import (
 
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/config"
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/database"
-	"github.com/Dev-Qwerty/zod-backend/user_service/api/messageQueues"
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/routes"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -38,8 +37,8 @@ func Run() {
 		log.Printf("Failed to connect to db: %v", err)
 	}
 
-	messageQueues.InitializeKafka()
-	go messageQueues.Consume()
+	// messageQueues.InitializeKafka()
+	// go messageQueues.Consume()
 
 	port := ":" + os.Getenv("PORT")
 
