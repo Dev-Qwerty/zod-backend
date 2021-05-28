@@ -6,7 +6,7 @@ const chatModel = require('../models/chatModel')
 const parseJson = express.json({ extended: true })
 
 const channelMessage = async (projectSpace, socket, app) => {
-    const projectid = projectSpace.name.slice(1)
+    const projectid = projectSpace.name.slice(1).replace('/chat', "")
     const doc = await channelModel.find({ projectid, members: { $elemMatch: { email: socket.email } } }, 'channelid -_id')
     for (i = 0; i < doc.length; i++) {
         socket.join(doc[i].channelid)
@@ -23,16 +23,16 @@ const channelMessage = async (projectSpace, socket, app) => {
                 name: user.name,
                 imgUrl: user.imgUrl,
             },
+            ts: Date.now(),
             content: req.body.content
         })
         await message.save()
         const respMessage = {
-            id: message._id,
             projectid,
             channelid: message.channelid,
             content: message.content,
             author: message.author,
-            date: message.date
+            ts: message.ts
         }
 
         projectSpace.to(channel).emit('new message', respMessage)
