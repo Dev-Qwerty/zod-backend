@@ -1,16 +1,13 @@
 const express = require('express')
-const { customAlphabet } = require('nanoid')
+
+const createList = require('./list')
+const createCard = require('./card')
 
 // Import models
 const Card = require('../models/card')
-const List = require('../models/list')
 
 const router = express.Router()
 const parseJson = express.json({ extended: true })
-
-// Create 12 digit alphanumeric code for cardId
-const keyStore = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-const nanoid = customAlphabet(keyStore, 16)
 
 const boardChannel = (namespace, socket, app) => {
 
@@ -21,29 +18,16 @@ const boardChannel = (namespace, socket, app) => {
     // @route PSOT /api/:board/list/new
     // @desc Create a new list
     app.post('/api/:board/list/new', [parseJson], async (req, res) => {
-        try {
-            const room = req.params.board
-            const { title, pos, boardId } = req.body
+        const createdBy = socket.email
+        const room = req.params.board
+        resp = await createList(createdBy, req.body)
 
-            const email = socket.email
-
-            const newlist = new List({
-                listId: "L" + nanoid(),
-                title,
-                pos,
-                createdBy: email,
-                boardId
-            })
-
-            await newlist.save()
-            const response = {
-                listId: newlist.listId,
-                title: newlist.title,
-                pos: newlist.pos
-            }
+        if (resp[0] != "") {
+            response = resp[0]
             res.status(201).send('list created')
             namespace.to(room).emit('createList', response)
-        } catch (error) {
+        } else {
+            error = resp[1]
             console.log(error)
             res.status(500).send(error)
         }
@@ -52,43 +36,17 @@ const boardChannel = (namespace, socket, app) => {
     // @route POST /api/:board/card/new
     // @desc Create new list card
     app.post('/api/:board/card/new', [parseJson], async (req, res) => {
-        try {
-            const room = req.params.board
-            const { cardName, cardDescription, dueDate, pos, assigned, list, projectId } = req.body
 
-            const cardId = "I" + nanoid()
+        const createdBy = socket.email
+        const room = req.params.board
+        resp = await createCard(createdBy, req.body)
 
-            createdBy = socket.email
-
-            newCard = new Card({
-                cardId,
-                cardName,
-                cardDescription,
-                dueDate,
-                pos,
-                createdBy,
-                assigned,
-                list,
-                projectId
-            })
-
-            await newCard.save()
-            const response = {
-                cardId: newCard.cardId,
-                cardName: newCard.cardName,
-                cardDescription: newCard.cardDescription,
-                dueDate: newCard.dueDate,
-                pos: newCard.pos,
-                createdBy: newCard.createdBy,
-                assigned: newCard.assigned,
-                list: newCard.list,
-                project: newCard.projectId
-            }
-
+        if (resp[0] != "") {
+            const response = resp[0]
             res.status(201).send('card created')
             namespace.to(room).emit('createCard', response)
-
-        } catch (error) {
+        } else {
+            const error = resp[1]
             console.log(error)
             res.status(500).send(error)
         }
