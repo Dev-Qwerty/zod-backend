@@ -21,8 +21,8 @@ router(app)
 const server = http.createServer(app)
 const io = socket(server, {
     cors: {
-        origin: "http://localhost:3000",
-        methods: ['GET', 'POST', 'PUT', 'DELETE']
+        origin: "http://localhost:3000"
+        // methods: ['GET', 'POST', 'PUT', 'DELETE']
     }
 })
 
