@@ -15,11 +15,7 @@ const cardSchema = new mongoose.Schema({
         }
     ],
     createdBy: String,
-    list: {
-        _id: false,
-        listId: String,
-        listTitle: String
-    },
+    listId: String,
     projectId: String
 })
 

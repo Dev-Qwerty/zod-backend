@@ -18,21 +18,21 @@ func Consume() {
 
 	project := models.Project{}
 
-	if len(data) !=0 {
-		project.ID = data["member"].(map[string]interface{})["fid"].(string)
+	if len(data) != 0 {
+		project.Member.Fid = data["member"].(map[string]interface{})["fid"].(string)
 		project.ProjectId = data["projectId"].(string)
-		project.Role = data["member"].(map[string]interface{})["fid"].(string)
+		project.Member.Role = data["member"].(map[string]interface{})["fid"].(string)
 
 		err = json.Unmarshal(msg.Value, &data)
 		if bytes.NewBuffer(msg.Key).String() == "Create project" {
 			err = models.AddProject(project)
 			if err != nil {
-					log.Printf("Error at AddProject consumer.go: %v", err)
+				log.Printf("Error at AddProject consumer.go: %v", err)
 			}
 		}
 		if err != nil {
 			log.Printf("Error at Umarshal consumer.go: %v", err)
 		}
 	}
-	
+
 }
