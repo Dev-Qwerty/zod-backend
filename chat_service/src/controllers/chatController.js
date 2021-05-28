@@ -16,7 +16,7 @@ router
             res.status(400).send("Bad Request")
             return
         }
-        let messages = await chatModel.find({ channelid, ts: { $lt: latest } }).sort({ ts: -1 }).limit(20)
+        let messages = await chatModel.find({ channelid, ts: { $lt: latest } }, '-_id -__v').sort({ ts: -1 }).limit(20)
         messages.reverse()
         res.status(200).send(messages)
     })
