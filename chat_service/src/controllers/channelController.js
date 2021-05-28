@@ -227,22 +227,28 @@ router
 router
     .route('/:projectid/:channelid/fetchmembers')
     .get(async (req, res) => {
-        const projectid = req.params.projectid
-        const channelid = req.params.channelid
-        let projectMembers = await userModel.find({ projectRole: { $elemMatch: { projectid } } }, 'email name imgUrl -_id')
-        let channelMembers = await channelModel.findOne({ projectid, channelid }, 'members -_id')
-        while (channelMembers.members.length > 0) {
-            j = 0
-            while (j < projectMembers.length) {
-                if (projectMembers[j].email == channelMembers.members[0].email) {
-                    projectMembers.splice(j, 1)
-                    channelMembers.members.splice(0, 1)
-                    break
+        try {
+            const projectid = req.params.projectid
+            const channelid = req.params.channelid
+            let projectMembers = await userModel.find({ projectRole: { $elemMatch: { projectid } } }, 'email name imgUrl -_id')
+            let channelMembers = await channelModel.findOne({ projectid, channelid }, 'members -_id')
+            while (channelMembers.members.length > 0) {
+                j = 0
+                while (j < projectMembers.length) {
+                    if (projectMembers[j].email == channelMembers.members[0].email) {
+                        projectMembers.splice(j, 1)
+                        channelMembers.members.splice(0, 1)
+                        break
+                    }
+                    j++
                 }
-                j++
             }
+            res.send(projectMembers)
+        } catch (error) {
+            console.log(error)
+            res.send(error)
         }
-        res.send(projectMembers)
+
     })
 
 

@@ -108,7 +108,6 @@ projectSpaces.use((socket, next) => {
 
 projectSpaces.on("connection", socket => {
     const projectSpace = socket.nsp
-    socket.emit("connection", "socket connected")
     require('./src/socket/channelMessage')(projectSpace, socket, app)
 })
 
