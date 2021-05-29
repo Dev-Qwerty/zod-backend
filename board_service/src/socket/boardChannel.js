@@ -2,9 +2,8 @@ const express = require('express')
 
 const createList = require('./list')
 const createCard = require('./card')
-
-// Import models
 const Card = require('../models/card')
+const verifyUser = require('../middlewares/verifyUser')
 
 const router = express.Router()
 const parseJson = express.json({ extended: true })
@@ -17,8 +16,8 @@ const boardChannel = (namespace, socket, app) => {
 
     // @route PSOT /api/:board/list/new
     // @desc Create a new list
-    app.post('/api/:board/list/new', [parseJson], async (req, res) => {
-        const createdBy = socket.email
+    app.post('/api/:board/list/new', [verifyUser, parseJson], async (req, res) => {
+        const createdBy = req.decodedToken.email
         const room = req.params.board
         resp = await createList(createdBy, req.body)
 
@@ -37,7 +36,7 @@ const boardChannel = (namespace, socket, app) => {
     // @desc Create new list card
     app.post('/api/:board/card/new', [parseJson], async (req, res) => {
 
-        const createdBy = socket.email
+        const createdBy = req.decodedToken.email
         const room = req.params.board
         resp = await createCard(createdBy, req.body)
 
