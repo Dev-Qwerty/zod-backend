@@ -14,6 +14,21 @@ async function createCard(createdBy, data) {
     try {
         const { cardName, cardDescription, dueDate, pos, assigned, listId, projectId } = data
 
+        const email = createdBy
+        // Check if the user updating list is inside the board
+        let doc = await Board.findOne({
+            boardId, members: {
+                $elemMatch: { email }
+            }
+        })
+
+        if (doc == null) {
+            const error = {
+                message: "Unauthorized user"
+            }
+            return ["", error]
+        }
+
         const cardId = "I" + nanoid()
 
         newCard = new Card({

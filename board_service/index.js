@@ -29,7 +29,7 @@ const io = socket(server, {
 const boardNamespace = io.of(/.*$/)
 
 boardNamespace.use((socket, next) => {
-    auth.verifyIdToken(socket.handshake.auth.token)
+    auth.verifyIdToken(socket.handshake.auth.Authorization)
         .then((decodedToken) => {
             socket.email = decodedToken.email
             next()
