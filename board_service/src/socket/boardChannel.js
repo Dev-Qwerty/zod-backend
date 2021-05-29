@@ -1,6 +1,6 @@
 const express = require('express')
 
-const { createList, updateList } = require('./list')
+const { createList, updateList, deleteList } = require('./list')
 const createCard = require('./card')
 const Card = require('../models/card')
 const verifyUser = require('../middlewares/verifyUser')
@@ -32,7 +32,7 @@ const boardChannel = (namespace, socket, app) => {
         }
     })
 
-    // @route PUT /api/:board/list/pos
+    // @route POST /api/:board/list/update
     // @desc Update the position of board
     app.post('/api/:board/list/update', [verifyUser, parseJson], async (req, res) => {
         const room = req.params.board
@@ -44,6 +44,25 @@ const boardChannel = (namespace, socket, app) => {
             const response = resp[0]
             res.status(201).send('list updated')
             namespace.to(room).emit('updateList', response)
+        } else {
+            const error = resp[1]
+            console.log(error)
+            error.message == "Unauthorized user" ? res.status(401).send(error.message) : res.status(500).send(error)
+        }
+    })
+
+    // @route DELETE /api/:board/list/delete
+    // @desc Delete the board
+    app.delete('/api/:board/list/delete/:listId', [verifyUser, parseJson], async (req, res) => {
+        const room = req.params.board
+        const deletedBy = req.decodedToken.email
+
+        resp = await deleteList(deletedBy, req.params)
+
+        if (resp[0] != "") {
+            const response = resp[0]
+            res.status(201).send('list deleted')
+            namespace.to(room).emit('deleteList', response)
         } else {
             const error = resp[1]
             console.log(error)

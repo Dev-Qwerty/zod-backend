@@ -3,6 +3,7 @@ const { customAlphabet } = require('nanoid')
 // Import models
 const List = require('../models/list')
 const Board = require('../models/board')
+const Card = require('../models/card')
 
 // Create 12 digit alphanumeric code for cardId
 const keyStore = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -91,5 +92,37 @@ async function updateList(updatedBy, boardId, data) {
     }
 }
 
+async function deleteList(deletedBy, data) {
+    try {
+        const { board, listId } = data
+
+        const email = deletedBy
+        // Check if the user updating list is inside the board
+        let doc = await Board.findOne({
+            boardId: board, members: {
+                $elemMatch: { email }
+            }
+        })
+
+        if (doc == null) {
+            const error = {
+                message: "Unauthorized user"
+            }
+            return ["", error]
+        }
+
+        doc = await List.findOneAndDelete({ listId })
+        await Card.deleteMany({ listId })
+
+        const response = {
+            listId: doc.listId
+        }
+        return [response, ""]
+    } catch (error) {
+        console.log(error)
+        return ["", error]
+    }
+}
+
 // module.exports = router
-module.exports = { createList, updateList }
+module.exports = { createList, updateList, deleteList }
