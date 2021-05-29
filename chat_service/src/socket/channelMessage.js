@@ -2,6 +2,7 @@ const express = require('express')
 const channelModel = require('../models/channelModel')
 const userModel = require('../models/userModel')
 const chatModel = require('../models/chatModel')
+const VerifyUser = require('../middlewares/verifyuser')
 
 const parseJson = express.json({ extended: true })
 
@@ -12,14 +13,15 @@ const channelMessage = async (projectSpace, socket, app) => {
         socket.join(doc[i].channelid)
     }
 
-    app.post('/api/chat/:channelid/messages', [parseJson], async (req, res) => {
+    app.post('/api/chat/:channelid/messages', [VerifyUser, parseJson], async (req, res) => {
         const channel = req.params.channelid
-        const user = await userModel.findOne({ email: socket.email }, 'name imgUrl -_id')
+        const email = req.decodedToken.email
+        const user = await userModel.findOne({ email }, 'name imgUrl -_id')
         const message = new chatModel({
             projectid,
             channelid: req.params.channelid,
             author: {
-                email: socket.email,
+                email,
                 name: user.name,
                 imgUrl: user.imgUrl,
             },
