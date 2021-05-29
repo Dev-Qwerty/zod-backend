@@ -28,7 +28,7 @@ const boardChannel = (namespace, socket, app) => {
         } else {
             error = resp[1]
             console.log(error)
-            res.status(500).send(error)
+            error.message == "Unauthorized user" ? res.status(401).send(error.message) : res.status(500).send(error)
         }
     })
 
@@ -47,7 +47,7 @@ const boardChannel = (namespace, socket, app) => {
         } else {
             const error = resp[1]
             console.log(error)
-            res.status(500).send(error)
+            error.message == "Unauthorized user" ? res.status(401).send(error.message) : res.status(500).send(error)
         }
     })
 
@@ -66,7 +66,7 @@ const boardChannel = (namespace, socket, app) => {
         } else {
             const error = resp[1]
             console.log(error)
-            res.status(500).send(error)
+            error.message == "Unauthorized user" ? res.status(401).send(error.message) : res.status(500).send(error)
         }
     })
 

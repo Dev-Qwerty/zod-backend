@@ -15,6 +15,21 @@ async function createList(createdBy, data) {
     try {
         const { title, pos, boardId } = data
 
+        const email = createdBy
+        // Check if the user updating list is inside the board
+        let doc = await Board.findOne({
+            boardId, members: {
+                $elemMatch: { email }
+            }
+        })
+
+        if (doc == null) {
+            const error = {
+                message: "Unauthorized user"
+            }
+            return ["", error]
+        }
+
         const newlist = new List({
             listId: "L" + nanoid(),
             title,
