@@ -88,7 +88,7 @@ require('./src/routes/route')(app)
 // Initialize socket
 const io = socketio(server, {
     cors: {
-        origin: ["http://localhost:8080", "http://localhost:3000"],
+        origin: ["https://zod-frontend.herokuapp.com", "http://localhost:8080", "http://localhost:3000"],
     }
 })
 
