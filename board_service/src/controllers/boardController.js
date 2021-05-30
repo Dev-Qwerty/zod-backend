@@ -23,6 +23,7 @@ router
         const email = req.decodedToken.email
 
         try {
+            // Check if the user is a member of project
             let doc = await User.findOne({
                 email, projects: {
                     $elemMatch: { projectId }
@@ -237,6 +238,7 @@ router
         const email = req.decodedToken.email
 
         try {
+            // Check if the user is a member of project
             let doc = await Board.findOne({
                 boardId, projectId, members: {
                     $elemMatch: { email }
