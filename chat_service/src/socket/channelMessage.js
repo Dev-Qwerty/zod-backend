@@ -41,6 +41,24 @@ const channelMessage = async (projectSpace, socket, app) => {
         res.send(respMessage)
     })
 
+    app.delete('/api/chat/:channelid/messages/:messagets', [VerifyUser, parseJson], async (req, res) => {
+        try {
+            const channelid = req.params.channelid
+            const ts = parseInt(req.params.messagets)
+            const email = req.decodedToken.email
+            const deletedMessage = await chatModel.findOneAndDelete({ channelid, ts, "author.email": email })
+            if (deletedMessage) {
+                projectSpace.to(channelid).emit("deleteMessage", { "channelid": deletedMessage.channelid, "ts": deletedMessage.ts })
+                res.status(200).json({ "channelid": deletedMessage.channelid, "ts": deletedMessage.ts })
+                return
+            }
+            res.status(400).send("Failed to delete message")
+        } catch (error) {
+            console.log("Delete Chat: ", error)
+            res.status(500).send(error)
+        }
+    })
+
 }
 
 module.exports = channelMessage
