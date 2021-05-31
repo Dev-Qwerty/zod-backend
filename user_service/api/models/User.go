@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"math/rand"
+	"strings"
 	"time"
 
 	"firebase.google.com/go/v4/auth"
@@ -16,10 +17,9 @@ import (
 // User model
 type User struct {
 	ID        string    `pg:"id,notnull,unique" json:"id"`
-	Fname     string    `pg:"fname,notnull" json:"fname"`
-	Lname     string    `pg:"lname,notnull" json:"lname"`
+	Name      string    `pg:"name,notnull" json:"name"`
 	Email     string    `pg:"email,notnull,unique" json:"email"`
-	Imgurl    string    `pg:"imgurl" json:"imgurl"`
+	Imgurl    string    `pg:"imgurl,notnull" json:"imgurl"`
 	CreatedAt time.Time `pg:"createdat,notnull" json:"created_at"`
 	Project   []string  `pg:"projects,array" json:"projects"`
 	Role      []string  `pg:"owner,array" json:"role"`
@@ -27,8 +27,7 @@ type User struct {
 
 // FirebaseUser model
 type FirebaseUser struct {
-	Fname    string `json:"fname"`
-	Lname    string `json:"lname"`
+	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
@@ -36,29 +35,29 @@ type FirebaseUser struct {
 // UpdatedUser model
 type UpdatedUser struct {
 	ID    string
-	Fname string `json:"fname"`
-	Lname string `json:"lname"`
+	Name  string `json:"name"`
 	Email string `json:"email"`
 }
 
 // Create profile avatars(UI Avatar)
-func generateProfileAvatar(fname, lname string) string {
+func generateProfileAvatar(name string) string {
+	name = strings.TrimSpace(name)
+	name = strings.ReplaceAll(name, " ", "+")
 	rand.Seed(time.Now().Unix())
 	colorsArray := []string{"F44336", "9C27B0", "CDDC39", "FF9800", "757575", "00ACC1", "E91E63", "004D40", "FFEB3B", "607D8B0", "4E342E", "E64A19", "4CAF50", "039BE5", "F57F17", "424242", "00BFA5", "D81B60", "006064", "5E35B1"}
 	bgColor := colorsArray[rand.Intn(len(colorsArray))]
-	imgUrl := "https://ui-avatars.com/api/?name=" + fname + "+" + lname + "&background=" + bgColor + "&color=fff"
+	imgUrl := "https://ui-avatars.com/api/?name=" + name + "&background=" + bgColor + "&color=fff"
 	return imgUrl
 }
 
 // CreateNewUser creates a new user
 func CreateNewUser(user FirebaseUser) error {
-	displayName := user.Fname + " " + user.Lname
 
-	imgUrl := generateProfileAvatar(user.Fname, user.Fname)
+	imgUrl := generateProfileAvatar(user.Name)
 
 	// Save user to firebase
 	params := (&auth.UserToCreate{}).
-		DisplayName(displayName).
+		DisplayName(user.Name).
 		Email(user.Email).
 		Password(user.Password).
 		EmailVerified(false).
@@ -73,8 +72,7 @@ func CreateNewUser(user FirebaseUser) error {
 	newuser := &User{}
 
 	newuser.ID = u.UID
-	newuser.Fname = user.Fname
-	newuser.Lname = user.Lname
+	newuser.Name = user.Name
 	newuser.Email = user.Email
 	newuser.Imgurl = imgUrl
 	newuser.CreatedAt = time.Now()
@@ -87,7 +85,8 @@ func CreateNewUser(user FirebaseUser) error {
 		return err
 	}
 
-	err = utils.SendEmailVerificationLink(user.Fname, user.Email)
+	name := strings.Fields(user.Name)[0]
+	err = utils.SendEmailVerificationLink(name, user.Email)
 	if err != nil {
 		log.Printf("Error at CreateNewUser User.go : %v", err)
 		return err
@@ -100,14 +99,13 @@ func CreateNewUser(user FirebaseUser) error {
 func FetchUser(uid string) (map[string]string, error) {
 	user := &User{}
 	resp := make(map[string]string)
-	err := database.DB.Model(user).Column("fname", "lname", "email").Where("id = ?", uid).Select()
+	err := database.DB.Model(user).Column("name", "email").Where("id = ?", uid).Select()
 	if err != nil {
 		log.Printf("Error at FetchUser User.go: %v", err)
 		return resp, err
 	}
 
-	resp["fname"] = user.Fname
-	resp["lname"] = user.Lname
+	resp["name"] = user.Name
 	resp["email"] = user.Email
 
 	return resp, nil
@@ -126,17 +124,25 @@ func UpdateUser(data UpdatedUser) error {
 			return err
 		}
 	}
-	if data.Fname != "" {
-		user.Fname = data.Fname
-		_, err := database.DB.Model(user).Set("fname = ?fname").Where("id = ?id").Update()
+	if data.Name != "" {
+		imgUrl := generateProfileAvatar(data.Name)
+		user.Name = data.Name
+		user.Imgurl = imgUrl
+
+		params := (&auth.UserToUpdate{}).DisplayName(user.Name).PhotoURL(imgUrl)
+
+		_, err := config.Client.UpdateUser(context.Background(), user.ID, params)
 		if err != nil {
 			log.Printf("Error at UpdatUser User.go : %v", err)
 			return err
 		}
-	}
-	if data.Lname != "" {
-		user.Lname = data.Lname
-		_, err := database.DB.Model(user).Set("lname = ?lname").Where("id = ?id").Update()
+		// _, err = database.DB.Model(user).WherePK().Update()
+		_, err = database.DB.Model(user).Set("name = ?name").Where("id = ?id").Update()
+		if err != nil {
+			log.Printf("Error at UpdatUser User.go : %v", err)
+			return err
+		}
+		_, err = database.DB.Model(user).Set("imgurl = ?imgurl").Where("id = ?id").Update()
 		if err != nil {
 			log.Printf("Error at UpdatUser User.go : %v", err)
 			return err
