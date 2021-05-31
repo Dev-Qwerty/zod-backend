@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"math/rand"
 	"time"
 
 	"firebase.google.com/go/v4/auth"
@@ -18,6 +19,7 @@ type User struct {
 	Fname     string    `pg:"fname,notnull" json:"fname"`
 	Lname     string    `pg:"lname,notnull" json:"lname"`
 	Email     string    `pg:"email,notnull,unique" json:"email"`
+	Imgurl    string    `pg:"imgurl" json:"imgurl"`
 	CreatedAt time.Time `pg:"createdat,notnull" json:"created_at"`
 	Project   []string  `pg:"projects,array" json:"projects"`
 	Role      []string  `pg:"owner,array" json:"role"`
@@ -42,12 +44,20 @@ type UpdatedUser struct {
 // CreateNewUser creates a new user
 func CreateNewUser(user FirebaseUser) error {
 	displayName := user.Fname + " " + user.Lname
+
+	// Create ui avatars
+	rand.Seed(time.Now().Unix())
+	colorsArray := []string{"F44336", "9C27B0", "CDDC39", "FF9800", "757575", "00ACC1", "E91E63", "004D40", "FFEB3B", "607D8B0", "4E342E", "E64A19", "4CAF50", "039BE5", "F57F17", "424242", "00BFA5", "D81B60", "006064", "5E35B1"}
+	bgColor := colorsArray[rand.Intn(len(colorsArray))]
+	imgUrl := "https://ui-avatars.com/api/?name=" + user.Fname + "+" + user.Lname + "&background=" + bgColor + "&color=fff"
+
 	// Save user to firebase
 	params := (&auth.UserToCreate{}).
 		DisplayName(displayName).
 		Email(user.Email).
 		Password(user.Password).
-		EmailVerified(false)
+		EmailVerified(false).
+		PhotoURL(imgUrl)
 
 	u, err := config.Client.CreateUser(context.Background(), params)
 	if err != nil {
@@ -61,6 +71,7 @@ func CreateNewUser(user FirebaseUser) error {
 	newuser.Fname = user.Fname
 	newuser.Lname = user.Lname
 	newuser.Email = user.Email
+	newuser.Imgurl = imgUrl
 	newuser.CreatedAt = time.Now()
 
 	// Save user to postgres
