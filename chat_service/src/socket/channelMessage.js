@@ -48,8 +48,8 @@ const channelMessage = async (projectSpace, socket, app) => {
             const email = req.decodedToken.email
             const deletedMessage = await chatModel.findOneAndDelete({ channelid, ts, "author.email": email })
             if (deletedMessage) {
-                projectSpace.to(channelid).emit("delete message", { "channelid": deletedMessage.channelid, "ts": deletedMessage.ts })
-                res.status(200).json({ "ts": deletedMessage.ts })
+                projectSpace.to(channelid).emit("deleteMessage", { "channelid": deletedMessage.channelid, "ts": deletedMessage.ts })
+                res.status(200).json({ "channelid": deletedMessage.channelid, "ts": deletedMessage.ts })
                 return
             }
             res.status(400).send("Failed to delete message")
