@@ -1,4 +1,5 @@
 const express = require('express')
+const { nanoid } = require('nanoid')
 const channelModel = require('../models/channelModel')
 const userModel = require('../models/userModel')
 const chatModel = require('../models/chatModel')
@@ -18,6 +19,7 @@ const channelMessage = async (projectSpace, socket, app) => {
         const email = req.decodedToken.email
         const user = await userModel.findOne({ email }, 'name imgUrl -_id')
         const message = new chatModel({
+            messageid: nanoid(),
             projectid,
             channelid: req.params.channelid,
             author: {
@@ -34,6 +36,7 @@ const channelMessage = async (projectSpace, socket, app) => {
             channelid: message.channelid,
             content: message.content,
             author: message.author,
+            messageid: message.messageid,
             ts: message.ts
         }
 
@@ -57,6 +60,12 @@ const channelMessage = async (projectSpace, socket, app) => {
             console.log("Delete Chat: ", error)
             res.status(500).send(error)
         }
+    })
+
+    app.put('/api/chat/:channelid/messages/:messagets', [VerifyUser, parseJson], async (req, res) => {
+        const channelid = req.params.channelid
+        const ts = parseInt(req.params.messagets)
+        const email = req.decodedToken.email
     })
 
 }
