@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/config"
 	"github.com/Dev-Qwerty/zod-backend/user_service/api/models"
@@ -33,7 +34,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// FetchUser fetch details of a single user 
+// FetchUser fetch details of a single user
 func FetchUser(w http.ResponseWriter, r *http.Request) {
 	uid := r.Context().Value("uid").(string)
 
@@ -54,19 +55,15 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	user := models.UpdatedUser{}
 	user.ID = r.Context().Value("uid").(string)
-	
+
 	if v, found := data["email"]; found {
 		user.Email = v
 	}
 
-	if v, found := data["fname"]; found {
-		user.Fname = v
+	if v, found := data["name"]; found {
+		user.Name = v
 	}
 
-	if v, found := data["lname"]; found {
-		user.Lname = v
-	}
-	
 	if err != nil {
 		log.Printf("Failed decoding user: %v", err)
 		responses.ERROR(w, http.StatusBadRequest, err)
@@ -106,12 +103,13 @@ func ResendEmail(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusBadRequest, err)
 	} else {
 		u, err := config.Client.GetUserByEmail(context.Background(), email["email"])
+		name := strings.Fields(u.UserInfo.DisplayName)[0]
 		if err != nil {
 			log.Printf("Error at ResendEmail user_controller.go: %v", err)
 			responses.ERROR(w, http.StatusInternalServerError, err)
 		}
 
-		err = utils.SendEmailVerificationLink(u.UserInfo.DisplayName, email["email"])
+		err = utils.SendEmailVerificationLink(name, email["email"])
 		if err != nil {
 			log.Printf("Error at ResendEmail user_controller.go : %v", err)
 			responses.ERROR(w, http.StatusInternalServerError, err)
@@ -132,12 +130,13 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusBadRequest, err)
 	} else {
 		u, err := config.Client.GetUserByEmail(context.Background(), email["email"])
+		name := strings.Fields(u.UserInfo.DisplayName)[0]
 		if err != nil {
 			log.Printf("Error at ResetPassword user_controller.go: %v", err)
 			responses.ERROR(w, http.StatusInternalServerError, err)
 		}
 
-		err = utils.SendPasswordResetLink(u.UserInfo.DisplayName, email["email"])
+		err = utils.SendPasswordResetLink(name, email["email"])
 
 		if err != nil {
 			log.Printf("Error at ResetPassword user_controller.go : %v", err)
