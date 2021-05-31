@@ -41,15 +41,20 @@ type UpdatedUser struct {
 	Email string `json:"email"`
 }
 
+// Create profile avatars(UI Avatar)
+func generateProfileAvatar(fname, lname string) string {
+	rand.Seed(time.Now().Unix())
+	colorsArray := []string{"F44336", "9C27B0", "CDDC39", "FF9800", "757575", "00ACC1", "E91E63", "004D40", "FFEB3B", "607D8B0", "4E342E", "E64A19", "4CAF50", "039BE5", "F57F17", "424242", "00BFA5", "D81B60", "006064", "5E35B1"}
+	bgColor := colorsArray[rand.Intn(len(colorsArray))]
+	imgUrl := "https://ui-avatars.com/api/?name=" + fname + "+" + lname + "&background=" + bgColor + "&color=fff"
+	return imgUrl
+}
+
 // CreateNewUser creates a new user
 func CreateNewUser(user FirebaseUser) error {
 	displayName := user.Fname + " " + user.Lname
 
-	// Create ui avatars
-	rand.Seed(time.Now().Unix())
-	colorsArray := []string{"F44336", "9C27B0", "CDDC39", "FF9800", "757575", "00ACC1", "E91E63", "004D40", "FFEB3B", "607D8B0", "4E342E", "E64A19", "4CAF50", "039BE5", "F57F17", "424242", "00BFA5", "D81B60", "006064", "5E35B1"}
-	bgColor := colorsArray[rand.Intn(len(colorsArray))]
-	imgUrl := "https://ui-avatars.com/api/?name=" + user.Fname + "+" + user.Lname + "&background=" + bgColor + "&color=fff"
+	imgUrl := generateProfileAvatar(user.Fname, user.Fname)
 
 	// Save user to firebase
 	params := (&auth.UserToCreate{}).
