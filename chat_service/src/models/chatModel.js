@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 
 const chatSchema = new mongoose.Schema({
+    messageid: String,
     projectid: String,
     channelid: String,
     author: {
@@ -9,7 +10,11 @@ const chatSchema = new mongoose.Schema({
         email: String
     },
     ts: Number,
-    content: String
+    content: String,
+    edited: {
+        type: Boolean,
+        default: false
+    }
 })
 
 const chat = mongoose.model('chats', chatSchema);
