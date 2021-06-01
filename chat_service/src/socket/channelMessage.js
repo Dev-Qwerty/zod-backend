@@ -41,7 +41,7 @@ const channelMessage = async (projectSpace, socket, app) => {
             edited: message.edited
         }
 
-        projectSpace.to(channel).emit('new message', respMessage)
+        projectSpace.to(channel).emit('newMessage', respMessage)
         res.send(respMessage)
     })
 
