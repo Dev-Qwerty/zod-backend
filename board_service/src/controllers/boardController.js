@@ -66,10 +66,12 @@ router
                 res.status(401).send("Unauthorized user")
             }
 
-            const list = await List.find({ boardId })
-            const card = await Card.find({ boardId })
+            const list = await List.find({ boardId }, '-_id')
+            const card = await Card.find({ boardId }, '-_id')
+            doc = await Board.findOne({ boardId }, '-_id members.email')
 
             const response = {
+                members: doc.members,
                 lists: list,
                 cards: card
             }
