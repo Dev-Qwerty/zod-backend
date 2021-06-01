@@ -72,7 +72,7 @@ const channelMessage = async (projectSpace, socket, app) => {
             if (updatedMessage) {
                 delete updatedMessage._id
                 delete updatedMessage.__v
-                projectSpace.to(channelid).emit(updatedMessage)
+                projectSpace.to(channelid).emit("udpateMessage", updatedMessage)
                 res.status(200).send(updatedMessage)
                 return
             }
