@@ -10,7 +10,11 @@ const chatSchema = new mongoose.Schema({
         email: String
     },
     ts: Number,
-    content: String
+    content: String,
+    edited: {
+        type: Boolean,
+        default: false
+    }
 })
 
 const chat = mongoose.model('chats', chatSchema);

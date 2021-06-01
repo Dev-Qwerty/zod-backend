@@ -37,7 +37,8 @@ const channelMessage = async (projectSpace, socket, app) => {
             content: message.content,
             author: message.author,
             messageid: message.messageid,
-            ts: message.ts
+            ts: message.ts,
+            edited: message.edited
         }
 
         projectSpace.to(channel).emit('new message', respMessage)
@@ -62,10 +63,24 @@ const channelMessage = async (projectSpace, socket, app) => {
         }
     })
 
-    app.put('/api/chat/:channelid/messages/:messagets', [VerifyUser, parseJson], async (req, res) => {
-        const channelid = req.params.channelid
-        const ts = parseInt(req.params.messagets)
-        const email = req.decodedToken.email
+    app.put('/api/chat/:channelid/messages/:messagets/update', [VerifyUser, parseJson], async (req, res) => {
+        try {
+            const channelid = req.params.channelid
+            const ts = parseInt(req.params.messagets)
+            const email = req.decodedToken.email
+            const updatedMessage = await chatModel.findOneAndUpdate({ channelid, ts, "author.email": email }, { content: req.body.content, edited: true }, { new: true }).lean()
+            if (updatedMessage) {
+                delete updatedMessage._id
+                delete updatedMessage.__v
+                projectSpace.to(channelid).emit(updatedMessage)
+                res.status(200).send(updatedMessage)
+                return
+            }
+            res.status(400).send("Failed to updated message")
+        } catch (error) {
+            console.log(error)
+            res.status(500).send(error)
+        }
     })
 
 }
