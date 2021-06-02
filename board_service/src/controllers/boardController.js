@@ -66,39 +66,50 @@ router
                 res.status(401).send("Unauthorized user")
             }
 
-            const list = await List.find({ boardId }, '-_id')
-            const card = await Card.find({ boardId }, '-_id')
-            doc = await Board.findOne({ boardId }, '-_id members.email')
-
-            let lists = [{
-                listId: String,
-                title: String,
-                pos: Number,
-                createdBy: String,
-                boardId: String,
-                cards: Array
-            }]
-            let cards = []
-
-            for (let l = 0; l < list.length; l++) {
-                for (let c = 0; c < card.length; c++) {
-                    if (list[l].listId == card[c].listId) {
-                        cards.push(card[c])
+            // Fetch lists and cards in the board
+            lists = await List.aggregate([
+                { $match: { boardId } },
+                {
+                    $lookup: {
+                        from: "cards",
+                        localField: "listId",
+                        foreignField: "listId",
+                        as: "cards"
+                    }
+                },
+                {
+                    $project: {
+                        __v: 0,
+                        _id: 0,
+                        "cards.__v": 0,
+                        "cards._id": 0,
                     }
                 }
-                lists[l] = {
-                    listId: list[l].listId,
-                    title: list[l].title,
-                    pos: list[l].pos,
-                    createdBy: list[l].createdBy,
-                    boardId: list[l].boardId,
-                    cards
+            ])
+
+            // Fetch members in the board
+            doc = await Board.aggregate([
+                { $match: { boardId } },
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "members.email",
+                        foreignField: "email",
+                        as: "members"
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        "members.name": 1,
+                        "members.email": 1,
+                        "members.imgUrl": 1
+                    }
                 }
-                cards = []
-            }
+            ])
 
             const response = {
-                members: doc.members,
+                members: doc[0].members,
                 lists
             }
 
