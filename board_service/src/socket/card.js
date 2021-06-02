@@ -41,6 +41,7 @@ async function createCard(createdBy, boardId, data) {
             createdBy,
             assigned,
             listId,
+            boardId
         })
 
         await newCard.save()
@@ -52,7 +53,7 @@ async function createCard(createdBy, boardId, data) {
             pos: newCard.pos,
             createdBy: newCard.createdBy,
             assigned: newCard.assigned,
-            list: newCard.list,
+            listId: newCard.listId,
         }
 
         return [response, ""]
