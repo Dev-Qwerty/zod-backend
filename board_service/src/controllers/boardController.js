@@ -70,10 +70,36 @@ router
             const card = await Card.find({ boardId }, '-_id')
             doc = await Board.findOne({ boardId }, '-_id members.email')
 
+            let lists = [{
+                listId: String,
+                title: String,
+                pos: Number,
+                createdBy: String,
+                boardId: String,
+                cards: Array
+            }]
+            let cards = []
+
+            for (let l = 0; l < list.length; l++) {
+                for (let c = 0; c < card.length; c++) {
+                    if (list[l].listId == card[c].listId) {
+                        cards.push(card[c])
+                    }
+                }
+                lists[l] = {
+                    listId: list[l].listId,
+                    title: list[l].title,
+                    pos: list[l].pos,
+                    createdBy: list[l].createdBy,
+                    boardId: list[l].boardId,
+                    cards
+                }
+                cards = []
+            }
+
             const response = {
                 members: doc.members,
-                lists: list,
-                cards: card
+                lists
             }
 
             res.status(200).send(response)
