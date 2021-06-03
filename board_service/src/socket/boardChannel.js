@@ -1,7 +1,7 @@
 const express = require('express')
 
 const { createList, updateList, deleteList } = require('./list')
-const { createCard, deleteCard } = require('./card')
+const { createCard, updateCard, deleteCard } = require('./card')
 const Card = require('../models/card')
 const verifyUser = require('../middlewares/verifyUser')
 
@@ -82,6 +82,25 @@ const boardChannel = (namespace, socket, app) => {
             const response = resp[0]
             res.status(201).send('card created')
             namespace.to(room).emit('createCard', response)
+        } else {
+            const error = resp[1]
+            console.log(error)
+            error.message == "Unauthorized user" ? res.status(401).send(error.message) : res.status(500).send(error)
+        }
+    })
+
+    // @route POST /api/:board/card/update
+    // @desc Update the card
+    app.post('/api/:board/card/update', [verifyUser, parseJson], async (req, res) => {
+        const email = req.decodedToken.email
+        const room = req.params.board
+
+        resp = await updateCard(email, req.params.board, req.body)
+
+        if (resp[0] != "") {
+            const response = resp[0]
+            res.status(201).send('card updated')
+            namespace.to(room).emit('updateCard', response)
         } else {
             const error = resp[1]
             console.log(error)

@@ -16,7 +16,7 @@ async function createCard(createdBy, boardId, data) {
         const { cardName, cardDescription, dueDate, pos, assigned, listId } = data
 
         const email = createdBy
-        // Check if the user updating list is inside the board
+        // Check if the user creating card is inside the board
         let doc = await Board.findOne({
             boardId, members: {
                 $elemMatch: { email }
@@ -64,6 +64,54 @@ async function createCard(createdBy, boardId, data) {
     }
 }
 
+async function updateCard(updatedBy, boardId, data) {
+    try {
+        const { cardId, cardName, cardDescription, pos, dueDate, listId } = data
+        const email = updatedBy
+        // Check if the user updating card is inside the board
+        let doc = await Board.findOne({
+            boardId, members: {
+                $elemMatch: { email }
+            }
+        })
+
+        if (doc == null) {
+            const error = {
+                message: "Unauthorized user"
+            }
+            return ["", error]
+        }
+
+        let update = {}
+
+        cardName != undefined ? update.cardName = cardName : ""
+        cardDescription != undefined ? update.cardDescription = cardDescription : ""
+        pos != undefined ? update.pos = pos : ""
+        dueDate != undefined ? update.dueDate = dueDate : ""
+        listId != undefined ? update.listId = listId : ""
+
+        const card = await Card.findOneAndUpdate({ cardId }, update, { new: true })
+
+        const response = {
+            cardId: card.cardId,
+            cardName: card.cardName,
+            cardDescription: card.cardDescription,
+            dueDate: card.dueDate,
+            pos: card.pos,
+            createdBy: card.createdBy,
+            assigned: card.assigned,
+            listId: card.listId,
+            boardId: card.boardId
+        }
+
+        return [response, ""]
+
+    } catch (error) {
+        console.log(error)
+        return ["", error]
+    }
+}
+
 async function deleteCard(deletedBy, data) {
     try {
         console.log(data)
@@ -99,4 +147,4 @@ async function deleteCard(deletedBy, data) {
 }
 
 // module.exports = router
-module.exports = { createCard, deleteCard }
+module.exports = { createCard, updateCard, deleteCard }
