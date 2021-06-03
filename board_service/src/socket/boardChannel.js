@@ -1,7 +1,7 @@
 const express = require('express')
 
 const { createList, updateList, deleteList } = require('./list')
-const createCard = require('./card')
+const { createCard, updateCard, deleteCard } = require('./card')
 const Card = require('../models/card')
 const verifyUser = require('../middlewares/verifyUser')
 
@@ -72,11 +72,11 @@ const boardChannel = (namespace, socket, app) => {
 
     // @route POST /api/:board/card/new
     // @desc Create new list card
-    app.post('/api/:board/card/new', [parseJson], async (req, res) => {
+    app.post('/api/:board/card/new', [verifyUser, parseJson], async (req, res) => {
 
         const createdBy = req.decodedToken.email
         const room = req.params.board
-        resp = await createCard(createdBy, req.body)
+        resp = await createCard(createdBy, req.params.board, req.body)
 
         if (resp[0] != "") {
             const response = resp[0]
@@ -89,6 +89,43 @@ const boardChannel = (namespace, socket, app) => {
         }
     })
 
+    // @route POST /api/:board/card/update
+    // @desc Update the card
+    app.post('/api/:board/card/update', [verifyUser, parseJson], async (req, res) => {
+        const email = req.decodedToken.email
+        const room = req.params.board
+
+        resp = await updateCard(email, req.params.board, req.body)
+
+        if (resp[0] != "") {
+            const response = resp[0]
+            res.status(201).send('card updated')
+            namespace.to(room).emit('updateCard', response)
+        } else {
+            const error = resp[1]
+            console.log(error)
+            error.message == "Unauthorized user" ? res.status(401).send(error.message) : res.status(500).send(error)
+        }
+    })
+
+    // @route DELETE /api/:board/card/delete/:cardId
+    // @desc Delete the card
+    app.delete('/api/:board/card/delete/:cardId', [verifyUser, parseJson], async (req, res) => {
+        const deletedBy = req.decodedToken.email
+        const room = req.params.board
+
+        resp = await deleteCard(deletedBy, req.params)
+
+        if (resp[0] != "") {
+            const response = resp[0]
+            res.status(201).send('card deleted')
+            namespace.to(room).emit('deleteCard', response)
+        } else {
+            const error = resp[1]
+            console.log(error)
+            error.message == "Unauthorized user" ? res.status(401).send(error.message) : res.status(500).send(error)
+        }
+    })
 
     router
         .route('/delete')

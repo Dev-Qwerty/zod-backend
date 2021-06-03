@@ -16,7 +16,7 @@ const cardSchema = new mongoose.Schema({
     ],
     createdBy: String,
     listId: String,
-    projectId: String
+    boardId: String
 })
 
 const cards = mongoose.model('cards', cardSchema)

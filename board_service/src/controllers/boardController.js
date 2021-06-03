@@ -66,12 +66,51 @@ router
                 res.status(401).send("Unauthorized user")
             }
 
-            const list = await List.find({ boardId })
-            const card = await Card.find({ boardId })
+            // Fetch lists and cards in the board
+            lists = await List.aggregate([
+                { $match: { boardId } },
+                {
+                    $lookup: {
+                        from: "cards",
+                        localField: "listId",
+                        foreignField: "listId",
+                        as: "cards"
+                    }
+                },
+                {
+                    $project: {
+                        __v: 0,
+                        _id: 0,
+                        "cards.__v": 0,
+                        "cards._id": 0,
+                    }
+                }
+            ])
+
+            // Fetch members in the board
+            doc = await Board.aggregate([
+                { $match: { boardId } },
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "members.email",
+                        foreignField: "email",
+                        as: "members"
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        "members.name": 1,
+                        "members.email": 1,
+                        "members.imgUrl": 1
+                    }
+                }
+            ])
 
             const response = {
-                lists: list,
-                cards: card
+                members: doc[0].members,
+                lists
             }
 
             res.status(200).send(response)
