@@ -21,7 +21,7 @@ router(app)
 const server = http.createServer(app)
 const io = socket(server, {
     cors: {
-        origin: ["http://localhost:3000", "http://localhost:8080"]
+        origin: ["http://localhost:3000", "http://localhost:8080", "https://zod-frontend.herokuapp.com"]
         // methods: ['GET', 'POST', 'PUT', 'DELETE']
     }
 })
