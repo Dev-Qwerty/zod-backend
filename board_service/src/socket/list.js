@@ -43,7 +43,10 @@ async function createList(createdBy, data) {
         const response = {
             listId: newlist.listId,
             title: newlist.title,
-            pos: newlist.pos
+            pos: newlist.pos,
+            cards: [],
+            createdBy,
+            boardId
         }
         return [response, ""]
     } catch (error) {

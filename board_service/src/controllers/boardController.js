@@ -248,6 +248,7 @@ router
                 boardName,
                 members,
                 type,
+                createdBy: email,
                 projectId,
                 projectName
             })
