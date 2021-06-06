@@ -17,11 +17,11 @@ router
     .route('/new')
     .post([parseJson], async (req, res) => {
         try {
-            const { meetName, projectId, members, createdBy } = req.body
+            const { meetName, projectId, members } = req.body
 
             const meetId = nanoid()
             const meetUrl = `${process.env.BASE_URL}/${meetId}`
-            console.log(meetUrl)
+            const createdBy = req.decodedToken.email
 
             // Check if the members are in the project
             doc = await User.find({
