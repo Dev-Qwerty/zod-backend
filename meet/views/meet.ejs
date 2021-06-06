@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <script>
-        const ROOM_ID = "test"
-        const ROOM_LINK = `http://localhost:3000/${ROOM_ID}`
+        const MEET_ID = "<%= meetId %>"
+        const MEET_LINK = "<%= meetLink %>"
+        const MEET_NAME = "<%= meetName %>"
     </script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
         integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
@@ -44,8 +45,8 @@
             <div class="main__controls">
                 <div class="main__controls__block">
                     <div onclick="Swal.fire({
-                            title: 'Project final meeting',
-                            text: ROOM_LINK,
+                            title: MEET_NAME,
+                            text: MEET_LINK,
                             confirmButtonText: 'copy meeting link',
                             position: 'bottom-start',
                             confirmButtonColor: '#343434',
@@ -53,7 +54,7 @@
                         }).then((result) => {
                             if (result.isConfirmed) {
                                 var textarea = document.createElement('textarea');
-                                textarea.textContent = ROOM_LINK
+                                textarea.textContent = MEET_LINK
                                 textarea.style.position = 'fixed';  
                                 document.body.appendChild(textarea);
                                 textarea.select();
@@ -100,7 +101,9 @@
             </div>
             <div class="main__message_container">
                 <input id="chat_message" type="text" placeholder="Type message here...">
-                <button onclick="sendMessage()" class="main__controls__button">Send</button>
+                <div class="message__controls__send__button">
+                    <i class="fas fa-paper-plane"></i>
+                </div>
             </div>
         </div>
     </div>

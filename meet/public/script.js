@@ -1,8 +1,8 @@
 const socket = io()
 const peer = new Peer(undefined, {
-    host: '/',
-    path: '/peerjs',
-    port: '8082'
+    secure: true,
+    host: 'zode-peerserver.herokuapp.com',
+    port: 443,
 })
 
 const videoGrid = document.getElementById('video-grid')
@@ -11,13 +11,14 @@ myVideo.muted = true
 const peers = {}
 
 peer.on('open', (id) => {
-    socket.emit('join-room', ROOM_ID, id)
+    socket.emit('join-room', MEET_ID, id)
 })
 
 navigator.mediaDevices.getUserMedia({
     video: true,
     audio: true
 }).then((stream) => {
+    myVideoStream = stream
     addVideoStream(myVideo, stream)
 
     peer.on('call', (call) => {
@@ -68,4 +69,36 @@ function connectToNewUser(userId, stream) {
     call.on('close', () => {
         video.remove()
     })
+}
+
+const turnOffAudio = () => {
+    if (myVideoStream.getAudioTracks()[0].enabled == true) {
+        myVideoStream.getAudioTracks()[0].enabled = false
+        const showUnmuteBtn = `
+            <i class="fas fa-microphone-slash"></i>
+        `
+        document.querySelector('.main__audio_button').innerHTML = showUnmuteBtn
+    } else {
+        myVideoStream.getAudioTracks()[0].enabled = true
+        const showMuteBtn = `
+            <i class="fas fa-microphone"></i>
+        `
+        document.querySelector('.main__audio_button').innerHTML = showMuteBtn
+    }
+}
+
+const turnOffVideo = () => {
+    if (myVideoStream.getVideoTracks()[0].enabled == true) {
+        myVideoStream.getVideoTracks()[0].enabled = false
+        const showVideoPauseBtn = `
+            <i class="fas fa-video-slash"></i>
+         `
+        document.querySelector('.main__video_button').innerHTML = showVideoPauseBtn
+    } else {
+        myVideoStream.getVideoTracks()[0].enabled = true
+        const showVideoPlayBtn = `
+            <i class="fas fa-video"></i>
+         `
+        document.querySelector('.main__video_button').innerHTML = showVideoPlayBtn
+    }
 }
