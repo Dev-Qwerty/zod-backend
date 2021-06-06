@@ -2,15 +2,11 @@ const mongoose = require('mongoose')
 
 const meetSchema = new mongoose.Schema({
     meetId: String,
+    meetName: String,
     meetUrl: String,
     createdBy: String,
     projectId: String,
-    members: [
-        {
-            _id: false,
-            email: String,
-        }
-    ]
+    members: Array
 })
 
 const meets = mongoose.model('meets', meetSchema)
