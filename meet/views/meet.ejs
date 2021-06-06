@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        const MEET_ID = "<%= meetId %>"
+        const MEET_LINK = "<%= meetLink %>"
+        const MEET_NAME = "<%= meetName %>"
+    </script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+    <script defer src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
+    <script src="/socket.io/socket.io.js" defer></script>
+    <link rel="stylesheet" href="/style.css">
+    <script src="/script.js" defer></script>
+    <script src="https://kit.fontawesome.com/c939d0e917.js"></script>
+    <style>
+        #video-grid {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        video {
+            height: 300px;
+            width: 400px;
+            object-fit: cover;
+            padding: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <div class="main__left">
+            <div class="main__videos">
+                <div id="video-grid">
+
+                </div>
+            </div>
+            <div class="main__controls">
+                <div class="main__controls__block">
+                    <div onclick="Swal.fire({
+                            title: MEET_NAME,
+                            text: MEET_LINK,
+                            confirmButtonText: 'copy meeting link',
+                            position: 'bottom-start',
+                            confirmButtonColor: '#343434',
+                            background: '#e9e9e9'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                var textarea = document.createElement('textarea');
+                                textarea.textContent = MEET_LINK
+                                textarea.style.position = 'fixed';  
+                                document.body.appendChild(textarea);
+                                textarea.select();
+                                try {
+                                    return document.execCommand('copy')
+                                }
+                                catch (ex) {
+                                    console.warn('Copy to clipboard failed.', ex);
+                                    return false;
+                                }
+                                finally {
+                                    document.body.removeChild(textarea);
+                                }
+                            }
+                        })" class="main__controls__meeting_name">
+                        <p>Meeting Details</p>
+                    </div>
+                </div>
+                <div class="main__controls__block">
+                    <div onclick="turnOffAudio()" class="main__controls__button main__audio_button">
+                        <i class="fas fa-microphone"></i>
+                    </div>
+                    <div onclick="turnOffVideo()" class="main__controls__button main__video_button">
+                        <i class="fas fa-video"></i>
+                    </div>
+                </div>
+                <div class="main__controls__block">
+                    <div onclick="leaveMeeting()" class="main__controls__leave__button">
+                        <span class="leave_meeting">Leave Meeting</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="main__right">
+            <div class="main__header">
+                <h6>Chat</h6>
+            </div>
+            <div class="main__chat_window">
+                <ul id="message" class="messages">
+
+                </ul>
+
+            </div>
+            <div class="main__message_container">
+                <input id="chat_message" type="text" placeholder="Type message here...">
+                <div class="message__controls__send__button">
+                    <i class="fas fa-paper-plane"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

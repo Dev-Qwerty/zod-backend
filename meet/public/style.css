@@ -1,0 +1,189 @@
+.main {
+    height: 100vh;
+    display: flex;
+}
+
+/* Video playing and controls area to left */
+.main__left {
+    flex: 0.8;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Align chat area to right */
+.main__right {
+    flex: 0.2
+}
+
+/* Video playing area */
+.main__videos {
+    flex-grow: 1;
+    background-color: rgb(30, 30, 30);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+}
+
+/* Video Controls */
+.main__controls {
+    background-color: #000000;
+}
+
+/* Chat area */
+.main__right {
+    background-color: #242324;
+    border-left: 1px solid #3D3D42;
+}
+
+/* Video controls */
+.main__controls {
+    color: #D2D2D2;
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+}
+
+/* Display video controls horizontally */
+.main__controls__block {
+    display: flex;
+}
+
+/*  video controls  */
+.main__controls__button {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 10px;
+    min-width: 80px;
+    cursor: pointer;
+}
+
+/* style video controls on hover */
+.main__controls__button:hover {
+    background-color: #343434;
+    border-radius: 5px;
+}
+
+/* Video controls btn size */
+.main__controls__button i {
+    font-size: 26px;
+}
+
+/*  video controls  */
+.main__controls__meeting_name {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 10px;
+    min-width: 80px;
+    cursor: pointer;
+}
+
+/* style video controls on hover */
+.main__controls__meeting_name:hover {
+    background-color: #343434;
+    border-radius: 5px;
+}
+
+/* Video controls btn size */
+.main__controls__meeting_name i {
+    font-size: 26px;
+}
+
+/*  video controls  */
+.main__controls__leave__button {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 10px;
+    min-width: 80px;
+    cursor: pointer;
+}
+
+/* Video controls btn size */
+.main__controls__leave__button i {
+    font-size: 26px;
+}
+
+/*  video controls  */
+.message__controls__send__button {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: 45px;
+    cursor: pointer;
+}
+
+/* style video controls on hover */
+.message__controls__send__button i:hover {
+    color: #cfcfcf;
+}
+
+/* Video controls btn size */
+.message__controls__send__button i {
+    color: #F5F5F5;
+    font-size: 20px;
+}
+
+/* Chat area */
+.main__right {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Chat header */
+.main__header {
+    padding-top: 5px;
+    color: #F5F5F5;
+    text-align: center;
+}
+
+/* Message type area to bottom */
+.main__chat_window {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.messages{
+    color: white;
+    list-style: none;
+}
+
+.main__message_container {
+    border-top: #F5F5F5 solid 2px;
+    padding: 15px 7px;
+    display: flex;
+}
+
+.main__message_container input {
+    flex-grow: 1;
+    background-color: #353535;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    color: #F5F5F5;
+}
+
+.leave_meeting {
+    color: #F5F5F5;
+    font-size: 17px;
+    background-color: #CC3B33;
+    border: 2px solid #CC3B33;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.leave_meeting:hover {
+    background-color: #c41b13;
+}
+
+
+.fa-microphone-slash, .fa-video-slash {
+    color: #CC3B33;
+}
+
