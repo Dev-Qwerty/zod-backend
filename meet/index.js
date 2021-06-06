@@ -5,6 +5,9 @@ if (process.env.NODE_ENV != 'production') {
     require('dotenv').config()
 }
 
+// Connect to DB
+require('./src/config/db')
+
 const app = express()
 
 app.set('view engine', 'ejs')
