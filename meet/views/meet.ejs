@@ -104,11 +104,11 @@
                 </div>
                 <div class="main__controls__block">
                     <div onclick="
-                        axios.post('http:\/\/localhost:8082/leave', {
+                        axios.post('https:\/\/meet-zode.herokuapp.com/leave', {
                             meetId: MEET_ID
                         }).then((response) => {
                             if(response.status == 200) {
-                                window.location.replace(`http:\/\/localhost:8082/endmeeting?meet=${MEET_ID}`)
+                                window.location.replace(`https:\/\/meet-zode.herokuapp.com/endmeeting?meet=${MEET_ID}`)
                             }
                         })" class="main__controls__leave__button">
                         <span class="leave_meeting">Leave Meeting</span>
