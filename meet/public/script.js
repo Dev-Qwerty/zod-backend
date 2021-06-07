@@ -1,8 +1,11 @@
 const socket = io()
 const peer = new Peer(undefined, {
     secure: true,
-    host: 'zode-peerserver.herokuapp.com',
+    host: 'zode-com-server.herokuapp.com',
     port: 443,
+    // host: '/',
+    // path: '/peerjs',
+    // port: '8082'
 })
 
 const videoGrid = document.getElementById('video-grid')
@@ -43,7 +46,6 @@ navigator.mediaDevices.getUserMedia({
 })
 
 socket.on('user-disconnected', (userId) => {
-    console.log(userId)
     if (peers[userId]) {
         peers[userId].close()
     }
@@ -102,3 +104,33 @@ const turnOffVideo = () => {
         document.querySelector('.main__video_button').innerHTML = showVideoPlayBtn
     }
 }
+
+// CHAT FUNCTIONS
+const chatForm = document.getElementById('chat-form')
+
+// Message Submit
+chatForm.addEventListener('submit', (e) => {
+    e.preventDefault()
+
+    // Get message text
+    const msg = e.target.elements.msg.value
+
+    if (msg != '') {
+        socket.emit('new-message', msg)
+    }
+
+})
+
+// Catch msg from server
+socket.on('message', (msg) => {
+    showMessage(msg)
+})
+
+// Show message in DOM
+function showMessage(msg) {
+    const li = document.createElement('li')
+    li.classList.add('message')
+    li.innerHTML = `${msg}`
+    document.querySelector('.messages').appendChild(li)
+}
+
