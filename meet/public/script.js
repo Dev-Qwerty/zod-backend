@@ -57,6 +57,13 @@ function addVideoStream(video, stream) {
         video.play()
     })
     videoGrid.append(video)
+
+    let totalUser = document.getElementsByTagName('video').length
+    if (totalUser > 1) {
+        for (let i = 0; i < totalUser; i++) {
+            document.getElementsByTagName('video')[i].style.width = 100 / totalUser + "%"
+        }
+    }
 }
 
 function connectToNewUser(userId, stream) {
