@@ -33,6 +33,10 @@ video {
     object-fit: cover;
     max-width: 760px;
     padding: 0px 4px;
+    border-radius: 1rem;
+    transform: rotateY(180deg);
+    -webkit-transform: rotateY(180deg);
+    -moz-transform: rotateY(180deg);
 }
 
 #chat-container {

@@ -1,11 +1,11 @@
 const socket = io()
 const peer = new Peer(undefined, {
-    // secure: true,
-    // host: 'zode-com-server.herokuapp.com',
-    // port: 443,
-    host: '/',
-    path: '/peerjs',
-    port: '8082'
+    secure: true,
+    host: 'zode-com-server.herokuapp.com',
+    port: 443,
+    // host: '/',
+    // path: '/peerjs',
+    // port: '8082'
 })
 
 const videoGrid = document.getElementById('video-grid')
