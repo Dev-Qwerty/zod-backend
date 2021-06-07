@@ -119,6 +119,7 @@ chatForm.addEventListener('submit', (e) => {
         socket.emit('new-message', msg)
     }
 
+    e.target.elements.msg.value = ''
 })
 
 // Catch msg from server
@@ -133,4 +134,3 @@ function showMessage(msg) {
     li.innerHTML = `${msg}`
     document.querySelector('.messages').appendChild(li)
 }
-

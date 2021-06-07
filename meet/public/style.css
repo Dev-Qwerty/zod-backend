@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito&family=Roboto&display=swap');
 .main {
     height: 100vh;
     display: flex;
@@ -219,3 +220,31 @@
     box-shadow: none;
 }
 
+.main__details {
+    margin-top: 200px;
+    width: 100%;
+    display: flex;
+    position: fixed;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.main__details h1 {
+    color: #3a3a3a;
+    font-family: 'Roboto';
+}
+
+.main__details p {
+    color: #696969;
+    font-size: 22px;
+    margin-top: 5px;
+    font-family: 'Roboto';
+}
+
+.heading h2 {
+    margin-top: 10px;
+    margin-left: 15px;
+    color: #17a504;
+    font-family: 'Nunito';
+}

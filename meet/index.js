@@ -26,10 +26,25 @@ app.use(cors())
 app.set('view engine', 'ejs')
 // app.set('views', './public/views')
 app.use(express.static('public'))
+app.use(express.json({ extended: true }))
 
 router(app)
 
 app.get('/favicon.ico', (req, res) => res.status(204))
+
+app.post('/leave', async (req, res) => {
+    res.status(200).end()
+})
+
+app.get('/endmeeting', async (req, res) => {
+    const meetId = req.query.meet
+    let doc = await Meet.findOne({ meetId }, '-_id meetName')
+    if (doc == null) {
+        res.end()
+    } else {
+        res.render('endMeet', { meetName: doc.meetName })
+    }
+})
 
 app.get('/:meetid', async (req, res) => {
     const meetId = req.params.meetid
