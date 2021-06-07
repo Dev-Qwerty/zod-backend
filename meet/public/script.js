@@ -1,11 +1,11 @@
 const socket = io()
 const peer = new Peer(undefined, {
-    secure: true,
-    host: 'zode-com-server.herokuapp.com',
-    port: 443,
-    // host: '/',
-    // path: '/peerjs',
-    // port: '8082'
+    // secure: true,
+    // host: 'zode-com-server.herokuapp.com',
+    // port: 443,
+    host: '/',
+    path: '/peerjs',
+    port: '8082'
 })
 
 const videoGrid = document.getElementById('video-grid')
@@ -122,9 +122,14 @@ chatForm.addEventListener('submit', (e) => {
     e.target.elements.msg.value = ''
 })
 
+const chatMessages = document.querySelector('.main__chat_window')
+
 // Catch msg from server
 socket.on('message', (msg) => {
     showMessage(msg)
+
+    // Scroll down on new message
+    chatMessages.scrollTop = chatMessages.scrollHeight
 })
 
 // Show message in DOM
@@ -133,4 +138,14 @@ function showMessage(msg) {
     li.classList.add('message')
     li.innerHTML = `${msg}`
     document.querySelector('.messages').appendChild(li)
+}
+
+// Show/Hide chat box
+const showChat = () => {
+    const div = document.getElementById('chat-container')
+    div.style.display = div.style.display == "flex" ? "none" : "flex"
+    const showChatBtn = div.style.display == "flex" ? `
+            <i class="fas fa-comment-alt"></i>
+         ` : `<i class="far fa-comment-alt"></i>`
+    document.querySelector('.main__chat_button').innerHTML = showChatBtn
 }
