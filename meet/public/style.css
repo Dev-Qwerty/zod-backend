@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito&family=Roboto&display=swap');
+
 .main {
     height: 100vh;
     display: flex;
@@ -6,7 +7,7 @@
 
 /* Video playing and controls area to left */
 .main__left {
-    flex: 0.8;
+    flex: 1;
     display: flex;
     flex-direction: column;
 }
@@ -14,6 +15,32 @@
 /* Align chat area to right */
 .main__right {
     flex: 0.2
+}
+
+#video-grid {
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    flex-wrap: wrap;
+    overflow-y: auto;
+}
+
+video {
+    display: block;
+    flex: 1;
+    object-fit: cover;
+    max-width: 760px;
+    padding: 0px 4px;
+    border-radius: 1rem;
+    transform: rotateY(180deg);
+    -webkit-transform: rotateY(180deg);
+    -moz-transform: rotateY(180deg);
+}
+
+#chat-container {
+    display: none;
 }
 
 /* Video playing area */
@@ -24,6 +51,13 @@
     justify-content: center;
     align-items: center;
     padding: 40px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.main__videos::-webkit-scrollbar{
+    display: none;
 }
 
 /* Video Controls */
@@ -64,12 +98,12 @@
 /* style video controls on hover */
 .main__controls__button:hover {
     background-color: #343434;
-    border-radius: 5px;
+    border-radius: 100px;
 }
 
 /* Video controls btn size */
 .main__controls__button i {
-    font-size: 26px;
+    font-size: 28px;
 }
 
 /*  video controls  */
@@ -154,6 +188,11 @@
     flex-grow: 1;
     overflow-y: auto;
     max-width: 300px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.main__chat_window::-webkit-scrollbar{
+    display: none;
 }
 
 .messages{
@@ -163,7 +202,7 @@
 
 .messages li {
     border-bottom: #353535  solid 2px;
-    padding: 5px 0px;
+    padding: 10px 7px;
     margin-right: 15px;
     word-wrap: break-word;
 }

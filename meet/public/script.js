@@ -57,6 +57,13 @@ function addVideoStream(video, stream) {
         video.play()
     })
     videoGrid.append(video)
+
+    let totalUser = document.getElementsByTagName('video').length
+    if (totalUser > 1) {
+        for (let i = 0; i < totalUser; i++) {
+            document.getElementsByTagName('video')[i].style.width = 100 / totalUser + "%"
+        }
+    }
 }
 
 function connectToNewUser(userId, stream) {
@@ -122,9 +129,14 @@ chatForm.addEventListener('submit', (e) => {
     e.target.elements.msg.value = ''
 })
 
+const chatMessages = document.querySelector('.main__chat_window')
+
 // Catch msg from server
 socket.on('message', (msg) => {
     showMessage(msg)
+
+    // Scroll down on new message
+    chatMessages.scrollTop = chatMessages.scrollHeight
 })
 
 // Show message in DOM
@@ -133,4 +145,14 @@ function showMessage(msg) {
     li.classList.add('message')
     li.innerHTML = `${msg}`
     document.querySelector('.messages').appendChild(li)
+}
+
+// Show/Hide chat box
+const showChat = () => {
+    const div = document.getElementById('chat-container')
+    div.style.display = div.style.display == "flex" ? "none" : "flex"
+    const showChatBtn = div.style.display == "flex" ? `
+            <i class="fas fa-comment-alt"></i>
+         ` : `<i class="far fa-comment-alt"></i>`
+    document.querySelector('.main__chat_button').innerHTML = showChatBtn
 }

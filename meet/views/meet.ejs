@@ -23,19 +23,6 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js" defer></script>
     <script src="https://kit.fontawesome.com/c939d0e917.js" defer></script>
     <style>
-        #video-grid {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        video {
-            height: 300px;
-            width: 400px;
-            object-fit: cover;
-            padding: 8px;
-        }
-
         input:focus,
         select:focus {
             outline: none;
@@ -103,6 +90,9 @@
                     </div>
                 </div>
                 <div class="main__controls__block">
+                    <div onclick="showChat()" class="main__controls__button main__chat_button">
+                        <i class="far fa-comment-alt"></i>
+                    </div>
                     <div onclick="
                         axios.post('https:\/\/meet-zode.herokuapp.com/leave', {
                             meetId: MEET_ID
@@ -117,7 +107,7 @@
             </div>
 
         </div>
-        <div class="main__right">
+        <div id="chat-container" class="main__right">
             <div class="main__header">
                 <i class="fas fa-comment-alt"></i>
                 <h6>CHAT</h6>
