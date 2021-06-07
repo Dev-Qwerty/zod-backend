@@ -11,7 +11,7 @@
         const btn_text = "<i class=\"far fa-clone\"></i> Copy meeting link"
     </script>
     <title>
-        Zode-<%= meetName %>
+        Zode | <%= meetName %>
     </title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
         integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
@@ -20,8 +20,8 @@
     <script src="/socket.io/socket.io.js" defer></script>
     <link rel="stylesheet" href="/style.css">
     <script src="/script.js" defer></script>
-    <script src="/swal.js" defer></script>
-    <script src="https://kit.fontawesome.com/c939d0e917.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js" defer></script>
+    <script src="https://kit.fontawesome.com/c939d0e917.js" defer></script>
     <style>
         #video-grid {
             display: flex;
@@ -103,7 +103,14 @@
                     </div>
                 </div>
                 <div class="main__controls__block">
-                    <div onclick="leaveMeeting()" class="main__controls__leave__button">
+                    <div onclick="
+                        axios.post('http:\/\/localhost:8082/leave', {
+                            meetId: MEET_ID
+                        }).then((response) => {
+                            if(response.status == 200) {
+                                window.location.replace(`http:\/\/localhost:8082/endmeeting?meet=${MEET_ID}`)
+                            }
+                        })" class="main__controls__leave__button">
                         <span class="leave_meeting">Leave Meeting</span>
                     </div>
                 </div>
