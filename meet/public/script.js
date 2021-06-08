@@ -1,4 +1,4 @@
-const socket = io()
+const socket = io('/')
 const peer = new Peer(undefined, {
     secure: true,
     host: 'zode-com-server.herokuapp.com',
