@@ -12,6 +12,7 @@ if (process.env.NODE_ENV != 'production') {
 require('./src/config/db')
 const router = require('./src/routes/route')
 const Meet = require('./src/models/meet')
+const fetchUser = require('./src/utils/fetchUser')
 
 const app = express()
 
@@ -48,12 +49,32 @@ app.get('/endmeeting', async (req, res) => {
 
 app.get('/:meetid', async (req, res) => {
     const meetId = req.params.meetid
-    let doc = await Meet.findOne({ meetId }, '-_id meetName')
-    if (doc == null) {
-        res.status(404).end()
+
+    if (req.query.t == undefined) {
+        res.render('login')
     } else {
-        process.env.NODE_ENV == 'production' ? meetLink = `https://meet-zode.herokuapp.com/${meetId}` : meetLink = `http://localhost:8082/${meetId}`
-        res.render('meet', { meetId, meetLink, meetName: doc.meetName })
+        // Fetch user
+        let doc = await fetchUser(req.query.t)
+
+        if (doc == null) {
+            res.render('login')
+        } else {
+            let user = {
+                name: doc.name,
+                email: doc.email,
+                picture: doc.picture
+            }
+
+            user = JSON.stringify(user)
+
+            doc = await Meet.findOne({ meetId }, '-_id meetName')
+            if (doc == null) {
+                res.status(404).end()
+            } else {
+                process.env.NODE_ENV == 'production' ? meetLink = `https://meet-zode.herokuapp.com/${meetId}` : meetLink = `http://localhost:8082/${meetId}`
+                res.render('meet', { meetId, meetLink, meetName: doc.meetName, user })
+            }
+        }
     }
 })
 
@@ -66,8 +87,8 @@ io.on('connection', (socket) => {
             socket.to(roomId).emit('user-disconnected', userId)
         })
 
-        socket.on('new-message', (msg) => {
-            io.emit('message', msg)
+        socket.on('new-message', (name, msg) => {
+            io.emit('message', name, msg)
         })
     })
 
