@@ -55,17 +55,18 @@ app.get('/:meetid', async (req, res) => {
     } else {
         // Fetch user
         let doc = await fetchUser(req.query.t)
-        let user = {
-            name: doc.name,
-            email: doc.email,
-            picture: doc.picture
-        }
 
-        user = JSON.stringify(user)
-
-        if (user == null) {
+        if (doc == null) {
             res.render('login')
         } else {
+            let user = {
+                name: doc.name,
+                email: doc.email,
+                picture: doc.picture
+            }
+
+            user = JSON.stringify(user)
+
             doc = await Meet.findOne({ meetId }, '-_id meetName')
             if (doc == null) {
                 res.status(404).end()
@@ -86,8 +87,8 @@ io.on('connection', (socket) => {
             socket.to(roomId).emit('user-disconnected', userId)
         })
 
-        socket.on('new-message', (msg) => {
-            io.emit('message', msg)
+        socket.on('new-message', (name, msg) => {
+            io.emit('message', name, msg)
         })
     })
 

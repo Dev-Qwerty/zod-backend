@@ -123,7 +123,7 @@ chatForm.addEventListener('submit', (e) => {
     const msg = e.target.elements.msg.value
 
     if (msg != '') {
-        socket.emit('new-message', msg)
+        socket.emit('new-message', USER.name, msg)
     }
 
     e.target.elements.msg.value = ''
@@ -132,18 +132,22 @@ chatForm.addEventListener('submit', (e) => {
 const chatMessages = document.querySelector('.main__chat_window')
 
 // Catch msg from server
-socket.on('message', (msg) => {
-    showMessage(msg)
+socket.on('message', (name, msg) => {
+    showMessage(name, msg)
 
     // Scroll down on new message
     chatMessages.scrollTop = chatMessages.scrollHeight
 })
 
 // Show message in DOM
-function showMessage(msg) {
+function showMessage(name, msg) {
+
+    // get current time
+    const time = new Date().toLocaleTimeString().replace(/(.*)\D\d+/, '$1')
+
     const li = document.createElement('li')
     li.classList.add('message')
-    li.innerHTML = `${msg}`
+    li.innerHTML = `<b>${name}</b>&nbsp;&nbsp;${time}<br>${msg}`
     document.querySelector('.messages').appendChild(li)
 }
 

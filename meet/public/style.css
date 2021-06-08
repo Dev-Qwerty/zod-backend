@@ -202,9 +202,8 @@ video {
 }
 
 .messages li {
-    border-bottom: #353535  solid 2px;
-    padding: 10px 7px;
     margin-right: 15px;
+    margin-top: 15px;
     word-wrap: break-word;
 }
 
