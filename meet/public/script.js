@@ -160,3 +160,18 @@ const showChat = () => {
          ` : `<i class="far fa-comment-alt"></i>`
     document.querySelector('.main__chat_button').innerHTML = showChatBtn
 }
+
+// Show/Hide end meet button
+if (USER.host == false) {
+    const endBtn = document.querySelector('.main__end_button')
+    endBtn.style.display = "none"
+}
+
+// End meeting
+const endMeet = () => {
+    socket.emit('end-meeting', "end")
+}
+
+socket.on('end', () => {
+    window.location.replace(`http:\/\/localhost:8082/postmeet?meet=${MEET_ID}&end=1`)
+})

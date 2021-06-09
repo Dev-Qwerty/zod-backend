@@ -240,6 +240,33 @@ video {
     color: #CC3B33;
 }
 
+.main__end_button {
+    min-width: 90px;
+    margin-right: 2px;
+    border-radius: 100px;
+}
+.main__end_button:hover {
+    background-color: #000000;
+}
+
+.main__end_button span {
+    display: none;
+}
+
+.main__end_button:hover i {
+    display: none;
+}
+
+.main__end_button:hover span {
+    display: block;
+    color: #CC3B33;
+}
+
+.fa-phone-alt {
+    color: #CC3B33;
+    transform: rotate(135deg);
+}
+
 .swal__confirm__btn {
     background-color: transparent;
     border: none;

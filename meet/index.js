@@ -33,17 +33,18 @@ router(app)
 
 app.get('/favicon.ico', (req, res) => res.status(204))
 
-app.post('/leave', async (req, res) => {
-    res.status(200).end()
-})
-
-app.get('/endmeeting', async (req, res) => {
+app.get('/postmeet', async (req, res) => {
     const meetId = req.query.meet
+    const end = req.query.end
     let doc = await Meet.findOne({ meetId }, '-_id meetName')
     if (doc == null) {
         res.end()
     } else {
-        res.render('endMeet', { meetName: doc.meetName })
+        if (end != undefined) {
+            res.render('endMeet', { meetName: doc.meetName })
+        } else {
+            res.render('leaveMeet', { meetName: doc.meetName })
+        }
     }
 })
 
@@ -59,10 +60,13 @@ app.get('/:meetid', async (req, res) => {
         if (doc == null) {
             res.render('login')
         } else {
+            const createdBy = doc.email
+            const data = await Meet.findOne({ createdBy })
             let user = {
                 name: doc.name,
                 email: doc.email,
-                picture: doc.picture
+                picture: doc.picture,
+                host: data != null ? true : false
             }
 
             user = JSON.stringify(user)
@@ -81,14 +85,18 @@ app.get('/:meetid', async (req, res) => {
 io.on('connection', (socket) => {
     socket.on('join-room', (roomId, userId) => {
         socket.join(roomId)
-        socket.to(roomId).emit('user-connected', userId)
+        socket.broadcast.to(roomId).emit('user-connected', userId)
 
         socket.on('disconnect', () => {
-            socket.to(roomId).emit('user-disconnected', userId)
+            socket.broadcast.to(roomId).emit('user-disconnected', userId)
         })
 
         socket.on('new-message', (name, msg) => {
-            io.emit('message', name, msg)
+            io.to(roomId).emit('message', name, msg)
+        })
+
+        socket.on('end-meeting', () => {
+            io.to(roomId).emit('end')
         })
     })
 
