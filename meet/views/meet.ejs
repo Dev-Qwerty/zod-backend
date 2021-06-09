@@ -89,19 +89,18 @@
                     <div onclick="turnOffVideo()" class="main__controls__button main__video_button">
                         <i class="fas fa-video"></i>
                     </div>
-                </div>
-                <div class="main__controls__block">
                     <div onclick="showChat()" class="main__controls__button main__chat_button">
                         <i class="far fa-comment-alt"></i>
                     </div>
+                </div>
+                <div class="main__controls__block">
+                    <div onclick="endMeet()" class="main__controls__button main__end_button">
+                        <i class="fas fa-phone-alt"></i>
+                        <span>End meet</span>
+                    </div>
                     <div onclick="
-                        axios.post('https:\/\/meet-zode.herokuapp.com/leave', {
-                            meetId: MEET_ID
-                        }).then((response) => {
-                            if(response.status == 200) {
-                                window.location.replace(`https:\/\/meet-zode.herokuapp.com/endmeeting?meet=${MEET_ID}`)
-                            }
-                        })" class="main__controls__leave__button">
+                        window.location.replace(`http:\/\/localhost:8082/postmeet?meet=${MEET_ID}`)
+                        " class="main__controls__leave__button">
                         <span class="leave_meeting">Leave Meeting</span>
                     </div>
                 </div>
