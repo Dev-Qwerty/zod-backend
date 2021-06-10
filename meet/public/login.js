@@ -59,7 +59,7 @@ const login = () => {
 
 
         firebase.auth().signInWithEmailAndPassword(email, password)
-            .then((userCredential) => {
+            .then(() => {
                 firebase.auth().currentUser.getIdToken(/* forceRefresh */ true).then((idToken) => {
                     window.location.replace(`${URL}/${MEET_ID}?t=${idToken}`)
                 })
