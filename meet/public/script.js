@@ -8,6 +8,8 @@ const peer = new Peer(undefined, {
     // port: '8082'
 })
 
+const BASE_URL = "https://meet-zode.herokuapp.com"
+
 const videoGrid = document.getElementById('video-grid')
 const myVideo = document.createElement('video')
 myVideo.muted = true
@@ -161,6 +163,11 @@ const showChat = () => {
     document.querySelector('.main__chat_button').innerHTML = showChatBtn
 }
 
+// Leave meeting
+const leaveMeet = () => {
+    window.location.replace(`${BASE_URL}/postmeet?meet=${MEET_ID}`)
+}
+
 // Show/Hide end meet button
 if (USER.host == false) {
     const endBtn = document.querySelector('.main__end_button')
@@ -173,5 +180,5 @@ const endMeet = () => {
 }
 
 socket.on('end', () => {
-    window.location.replace(`http:\/\/localhost:8082/postmeet?meet=${MEET_ID}&end=1`)
+    window.location.replace(`${BASE_URL}/postmeet?meet=${MEET_ID}&end=1`)
 })

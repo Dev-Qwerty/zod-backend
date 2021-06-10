@@ -21,7 +21,6 @@
     <script src="/socket.io/socket.io.js" defer></script>
     <link rel="stylesheet" href="/style.css">
     <script src="/script.js" defer></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js" defer></script>
     <script src="https://kit.fontawesome.com/c939d0e917.js" defer></script>
     <style>
         input:focus,
@@ -98,9 +97,7 @@
                         <i class="fas fa-phone-alt"></i>
                         <span>End meet</span>
                     </div>
-                    <div onclick="
-                        window.location.replace(`http:\/\/localhost:8082/postmeet?meet=${MEET_ID}`)
-                        " class="main__controls__leave__button">
+                    <div onclick="leaveMeet()" class="main__controls__leave__button">
                         <span class="leave_meeting">Leave Meeting</span>
                     </div>
                 </div>

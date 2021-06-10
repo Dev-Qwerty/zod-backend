@@ -67,34 +67,34 @@ app.get('/postmeet', async (req, res) => {
 app.get('/:meetid', async (req, res) => {
     const meetId = req.params.meetid
 
-    if (req.query.t == undefined) {
-        res.render('login', { meetId })
-    } else {
-        // Fetch user
-        let doc = await fetchUser(req.query.t)
-
-        if (doc == null) {
-            res.render('login', { meetId })
+    const meet = await Meet.findOne({ meetId })
+    if (meet != null) {
+        if (req.query.t == undefined) {
+            res.render('login', { meetId, meetName: meet.meetName })
         } else {
-            const createdBy = doc.email
-            const data = await Meet.findOne({ createdBy })
-            let user = {
-                name: doc.name,
-                email: doc.email,
-                picture: doc.picture,
-                host: data != null ? true : false
-            }
+            // Fetch user
+            let doc = await fetchUser(req.query.t)
 
-            user = JSON.stringify(user)
-
-            doc = await Meet.findOne({ meetId }, '-_id meetName')
             if (doc == null) {
-                res.status(404).end()
+                res.render('login', { meetId, meetName: meet.meetName })
             } else {
+                const createdBy = doc.email
+                const isCreator = await Meet.findOne({ createdBy })
+                let user = {
+                    name: doc.name,
+                    email: doc.email,
+                    picture: doc.picture,
+                    host: isCreator != null ? true : false
+                }
+
+                user = JSON.stringify(user)
+
                 process.env.NODE_ENV == 'production' ? meetLink = `https://meet-zode.herokuapp.com/${meetId}` : meetLink = `http://localhost:8082/${meetId}`
-                res.render('meet', { meetId, meetLink, meetName: doc.meetName, user })
+                res.render('meet', { meetId, meetLink, meetName: meet.meetName, user })
             }
         }
+    } else {
+        res.render('noMeet')
     }
 })
 
