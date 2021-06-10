@@ -33,6 +33,22 @@ router(app)
 
 app.get('/favicon.ico', (req, res) => res.status(204))
 
+app.get('/getfbc', (req, res) => {
+    let fbc = {
+        apiKey: process.env.APIKEY,
+        authDomain: process.env.AUTHDOMAIN,
+        projectId: process.env.PROJECTID,
+        storageBucket: process.env.STORAGEBUCKET,
+        messagingSenderId: process.env.MESSAGINGSENDERID,
+        appId: process.env.APPID
+    }
+
+    const fbcStr = JSON.stringify(fbc)
+    fbc = Buffer.from(fbcStr).toString("base64")
+
+    res.status(200).json({ fbc: fbc })
+})
+
 app.get('/postmeet', async (req, res) => {
     const meetId = req.query.meet
     const end = req.query.end
@@ -52,13 +68,13 @@ app.get('/:meetid', async (req, res) => {
     const meetId = req.params.meetid
 
     if (req.query.t == undefined) {
-        res.render('login')
+        res.render('login', { meetId })
     } else {
         // Fetch user
         let doc = await fetchUser(req.query.t)
 
         if (doc == null) {
-            res.render('login')
+            res.render('login', { meetId })
         } else {
             const createdBy = doc.email
             const data = await Meet.findOne({ createdBy })

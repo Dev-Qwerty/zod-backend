@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito&family=Roboto&family=Open+Sans&display=swap');
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+    background: linear-gradient(500deg, #e9fced 40%, #fff 60%);
+	display: flex;
+    height: 100vh;
+}
+
+.container {
+    margin-top: 90px;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+}
+
+.container .heading {
+    color: #4CBF53;
+    margin-bottom: 30px;
+    font-size: 30px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: white;
+    box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.2);
+    padding: 20px 30px;
+    padding-bottom: 40px;
+    font-family: 'Roboto';
+}
+
+.login-form-header {
+    font-size: 20px;
+    margin: 10px 0px;
+    font-family: 'Nunito';
+    color: #686868;
+    max-width: 250px;
+    word-wrap: break-word;
+    text-align: center;
+}
+
+.login-input{
+    margin: 15px 0px;
+    font-family: 'Open Sans';
+    min-width: 250px;
+}
+
+.login-form input:focus {
+    box-shadow: none;
+}
+
+.invalid-input {
+    color: red;
+    font-size: 12px;
+}
+
+.login-btn {
+    margin-top: 10px;
+    background: #4CBF53 !important;
+    color: #fff !important;
+}
+
+.login-btn:hover {
+    background: #42a048 !important;
+}
+
+.login-form button:focus {
+    box-shadow: none
+}
+
+hr {
+    width: 70%;               
+}
+
+.g-btn {
+    border: 1px solid #c9c9c9 !important;
+    max-width: 250px;
+    color: #6e6e6e !important;
+}
+
+.g-btn img {
+    margin-bottom: 3px;
+    width: 20px;
+}
+
+.bAlert {
+    margin-top: 25px;
+    margin-right: 25px;
+    position: fixed;
+    top: 0;
+    right: 0;
+    display: inline;
+}
