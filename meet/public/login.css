@@ -91,11 +91,15 @@ hr {
     width: 20px;
 }
 
-.bAlert {
-    margin-top: 25px;
-    margin-right: 25px;
-    position: fixed;
-    top: 0;
-    right: 0;
-    display: inline;
+.forgot-pass {
+    margin-top: 15px;
+}
+
+.forgot-pass a{
+    color: #4CBF53;
+
+}
+.forgot-pass a:hover{
+    color: #169e1f;
+    text-decoration: none;
 }
