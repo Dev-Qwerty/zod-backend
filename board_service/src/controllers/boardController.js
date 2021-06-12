@@ -35,7 +35,11 @@ router
                 return
             }
 
-            doc = await Board.find({ projectId }, 'boardId boardName type -_id')
+            doc = await Board.find({
+                projectId, members: {
+                    $elemMatch: { email }
+                }
+            }, 'boardId boardName type -_id')
             res.status(200).send(doc)
 
         } catch (error) {
