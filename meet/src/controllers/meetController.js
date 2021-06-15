@@ -13,6 +13,8 @@ const parseJson = express.json({ extended: true })
 const keyStore = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const nanoid = customAlphabet(keyStore, 12)
 
+// @route POST /api/meet/new
+// @desc Create new meeting
 router
     .route('/new')
     .post([parseJson], async (req, res) => {
@@ -66,6 +68,28 @@ router
             res.status(500).send(error)
         }
 
+    })
+
+// @route GET /api/meet/:projectId
+// @desc Fetch the meetings in the project
+router
+    .route('/:projectId')
+    .get(async (req, res) => {
+        try {
+            const { projectId } = req.params
+            const email = req.decodedToken.email
+
+            const meetings = await Meet.find({
+                projectId, members: {
+                    $in: [email]
+                }
+            }, '-_id meetUrl')
+
+            res.status(200).send(meetings)
+        } catch (error) {
+            console.log(error)
+            res.status(500).send(error)
+        }
     })
 
 module.exports = router
