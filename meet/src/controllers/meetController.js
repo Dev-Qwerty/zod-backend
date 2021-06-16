@@ -19,7 +19,7 @@ router
     .route('/new')
     .post([parseJson], async (req, res) => {
         try {
-            const { meetName, projectId, members } = req.body
+            const { meetName, date, time, projectId, members } = req.body
 
             const meetId = nanoid()
             const meetUrl = `${process.env.BASE_URL}/${meetId}`
@@ -56,6 +56,8 @@ router
                 meetName,
                 meetUrl,
                 createdBy,
+                date,
+                time,
                 projectId,
                 members
             })
@@ -83,7 +85,7 @@ router
                 projectId, members: {
                     $in: [email]
                 }
-            }, '-_id meetUrl')
+            }, '-_id meetName meetUrl createdBy date time')
 
             res.status(200).send(meetings)
         } catch (error) {
