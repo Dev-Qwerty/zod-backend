@@ -59,7 +59,7 @@ func SendMail(link, name, email, mode string) error {
 func SendEmailVerificationLink(name, email string) error {
 
 	actionCodeSettings := auth.ActionCodeSettings{
-		URL: "https://zod-frontend.herokuapp.com/login",
+		URL: "https://zode.netlify.app/login",
 	}
 
 	link, err := config.Client.EmailVerificationLinkWithSettings(context.Background(), email, &actionCodeSettings)
@@ -81,7 +81,7 @@ func SendEmailVerificationLink(name, email string) error {
 // SendPasswordResetLink send link to reset user's password
 func SendPasswordResetLink(name, email string) error {
 	actionCodeSettings := auth.ActionCodeSettings{
-		URL: "https://zod-frontend.herokuapp.com/login",
+		URL: "https://zode.netlify.app/login",
 	}
 
 	link, err := config.Client.PasswordResetLinkWithSettings(context.Background(), email, &actionCodeSettings)
