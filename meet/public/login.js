@@ -53,7 +53,7 @@ const login = () => {
         }
     } else {
         const loginBtn = document.getElementById('loginBtn')
-        loginBtn.innerHTML = `<span id="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>&nbsp;&nbsp;Loggin in`
+        loginBtn.innerHTML = `<span id="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>&nbsp;&nbsp;Logging in`
         loginBtn.disabled = true
         spinner = document.getElementById('spinner')
 
