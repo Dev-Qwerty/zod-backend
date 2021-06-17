@@ -5,6 +5,8 @@ const meetSchema = new mongoose.Schema({
     meetName: String,
     meetUrl: String,
     createdBy: String,
+    date: String,
+    time: String,
     projectId: String,
     members: Array
 })
