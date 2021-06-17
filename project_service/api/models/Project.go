@@ -86,10 +86,12 @@ func (p *Project) CreateProject() (string, error) {
 	requestBody := bytes.NewBuffer(details)
 	requestBody1 := bytes.NewBuffer(details)
 	requestBody2 := bytes.NewBuffer(details)
+	requestBody3 := bytes.NewBuffer(details)
 
 	http.Post("https://zode-chat-service-test.herokuapp.com/api/channel/everyone/new", "application/json", requestBody) //For testing
 	http.Post("https://boardservice-zode.herokuapp.com/api/user/new", "application/json", requestBody1)
 	http.Post("https://userservice-zode.herokuapp.com/api/user/project/new", "application/json", requestBody2)
+	http.Post("https://meet-zode.herokuapp.com/api/user/new", "application/json", requestBody3)
 	// messageQueue.WriteMessage("Create Project", KafkaMessage)
 	id := createdProjectID.InsertedID.(string)
 	return id, nil
@@ -243,10 +245,12 @@ func (p *Project) AcceptInvite(userDetails *auth.UserInfo) error {
 	requestBody := bytes.NewBuffer(details)
 	requestBody1 := bytes.NewBuffer(details)
 	requestBody2 := bytes.NewBuffer(details)
+	requestBody3 := bytes.NewBuffer(details)
 
 	http.Post("https://zode-chat-service-test.herokuapp.com/api/channel/acceptinvite", "application/json", requestBody) //For testing
 	http.Post("https://boardservice-zode.herokuapp.com/api/user/new", "application/json", requestBody1)
 	http.Post("https://userservice-zode.herokuapp.com/api/user/project/new", "application/json", requestBody2)
+	http.Post("https://meet-zode.herokuapp.com/api/user/new", "application/json", requestBody3)
 	// messageQueue.WriteMessage("Accept Project Invite", KafkaMessage)
 
 	return nil
